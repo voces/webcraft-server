@@ -1,7 +1,10 @@
 
+import http from "http";
 import WebSocket from "ws";
+import Hapi from "@hapi/hapi";
 
-const wss = new WebSocket.Server( { port: 8080 } );
+const server = http.createServer();
+const wss = new WebSocket.Server( { noServer: true } );
 
 const connections = [];
 let id = 0;
@@ -62,3 +65,16 @@ wss.on( "connection", ws => {
 
 } );
 
+server.on( "upgrade", ( request, socket, head ) =>
+	wss.handleUpgrade( request, socket, head, ws =>
+		wss.emit( "connection", ws ) ) );
+
+server.listen( 8080 );
+
+const hapi = Hapi.server( { listener: server } );
+
+// hapi.route( {
+// 	method: "POST",
+// 	path: "/error",
+// 	handler: ( request, h ) => ( { hello: "World" } ),
+// } );
