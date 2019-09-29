@@ -4,9 +4,9 @@
   "description": "Minimum viable product of Bulldog server",
   "main": "src/index.js",
   "devDependencies": {
-    "babel-eslint": "^10.0.1",
+    "babel-eslint": "^10.0.3",
     "chai": "^4.2.0",
-    "eslint": "^5.16.0",
+    "eslint": "^6.4.0",
     "eslint-config-mdcs": "^4.2.3",
     "eslint-config-verit": "^1.0.2",
     "verit-test": "^3.1.0"
@@ -20,6 +20,8 @@
   "type": "module",
   "dependencies": {
     "@hapi/hapi": "^18.4.0",
+    "@hapi/joi": "^16.1.4",
+    "mysql2": "^1.7.0",
     "ws": "^7.1.2"
   }
 }

@@ -2,6 +2,8 @@
 import http from "http";
 import WebSocket from "ws";
 import Hapi from "@hapi/hapi";
+import Joi from "@hapi/joi";
+import { query } from "./mysql.js";
 
 const server = http.createServer();
 const wss = new WebSocket.Server( { noServer: true } );
@@ -71,10 +73,44 @@ server.on( "upgrade", ( request, socket, head ) =>
 
 server.listen( 8080 );
 
-const hapi = Hapi.server( { listener: server } );
+const hapi = Hapi.server( {
+	listener: server,
+	routes: {
+		cors: {
+			origin: [ "http://localhost:8081" ],
+		},
+		validate: {
+			failAction: ( request, h, err ) => {
 
-// hapi.route( {
-// 	method: "POST",
-// 	path: "/error",
-// 	handler: ( request, h ) => ( { hello: "World" } ),
-// } );
+				throw err;
+
+			},
+		},
+	},
+} );
+
+hapi.route( {
+	method: "POST",
+	path: "/error",
+	options: {
+		response: { emptyStatusCode: 204 },
+		handler: async request => {
+
+			const stack = request.payload.stack;
+			query( "INSERT INTO errors (stack) VALUES ((:stack));", { stack } ).catch( console.error );
+			return "";
+
+		},
+		validate: {
+			payload: Joi.object( {
+				stack: Joi.string().required(),
+			} ),
+		},
+	},
+} );
+
+hapi.events.on( "response", request => {
+
+	console.log( request.info.remoteAddress + ": " + request.method.toUpperCase() + " " + request.path + " --> " + request.response.statusCode );
+
+} );
