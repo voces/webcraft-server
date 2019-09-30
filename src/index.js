@@ -67,6 +67,8 @@ wss.on( "connection", ws => {
 
 } );
 
+setInterval( () => connections.length && send( { type: "update" } ), 100 );
+
 server.on( "upgrade", ( request, socket, head ) =>
 	wss.handleUpgrade( request, socket, head, ws =>
 		wss.emit( "connection", ws ) ) );
