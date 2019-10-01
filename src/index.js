@@ -79,7 +79,7 @@ const hapi = Hapi.server( {
 	listener: server,
 	routes: {
 		cors: {
-			origin: [ "http://localhost:8081" ],
+			origin: [ "http://localhost:8081", "http://notextures.io" ],
 		},
 		validate: {
 			failAction: ( request, h, err ) => {
