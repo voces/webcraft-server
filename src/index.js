@@ -30,7 +30,11 @@ const send = json => {
 
 };
 
-wss.on( "connection", ws => {
+wss.on( "connection", ( ws, req ) => {
+
+	ws.id = id ++;
+	const username = req.url.slice( 2 );
+	ws.username = username || ws.id.toString();
 
 	try {
 
@@ -42,7 +46,6 @@ wss.on( "connection", ws => {
 	} catch ( err ) { /* do nothing */ }
 
 	connections.push( ws );
-	ws.id = id ++;
 
 	ws.on( "message", message => {
 
@@ -63,7 +66,7 @@ wss.on( "connection", ws => {
 
 	} );
 
-	send( { type: "connection", connection: ws.id } );
+	send( { type: "connection", connection: ws.id, username: ws.username } );
 
 } );
 
@@ -71,7 +74,7 @@ setInterval( () => connections.length && send( { type: "update" } ), 100 );
 
 server.on( "upgrade", ( request, socket, head ) =>
 	wss.handleUpgrade( request, socket, head, ws =>
-		wss.emit( "connection", ws ) ) );
+		wss.emit( "connection", ws, request ) ) );
 
 server.listen( 8080 );
 
