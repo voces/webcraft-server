@@ -1,0 +1,3 @@
+[submodule "mvp-bd-client"]
+	path = mvp-bd-client
+	url = git@github.com:voces/mvp-bd-client.git
