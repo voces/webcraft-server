@@ -15,7 +15,7 @@ const send = network.send = ( json, time ) => {
 	if ( ! json.type ) return console.error( new Error( "missing message type" ) );
 
 	json.time = time || Date.now();
-	// console.log( json );
+	console.log( json );
 
 	network.dispatchEvent( json.type, json );
 
@@ -46,8 +46,8 @@ wss.on( "connection", ( ws, req ) => {
 		ws.send( JSON.stringify( {
 			type: "init",
 			connections: connections.length,
-			// time,
-			// state: game,
+			time,
+			state: game,
 		} ) );
 
 	} catch ( err ) { /* do nothing */ }
