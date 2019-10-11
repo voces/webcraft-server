@@ -15,11 +15,12 @@ const send = network.send = ( json, time ) => {
 	if ( ! json.type ) return console.error( new Error( "missing message type" ) );
 
 	json.time = time || Date.now();
-	console.log( json );
-
-	network.dispatchEvent( json.type, json );
+	if ( json.type !== "update" || Math.random() < 0.01 )
+		console.log( json );
 
 	const stringified = JSON.stringify( json );
+
+	network.dispatchEvent( json.type, JSON.parse( stringified ) );
 
 	connections.forEach( connection => {
 
