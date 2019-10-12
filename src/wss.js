@@ -94,9 +94,8 @@ wss.on( "connection", ( ws, req ) => {
 	ws.on( "close", () => {
 
 		connections.splice( connections.indexOf( ws ), 1 );
-		if ( connections.length )
-			send( { type: "disconnection", connection: ws.id } );
-		else
+		send( { type: "disconnection", connection: ws.id } );
+		if ( connections.length === 0 )
 			stop();
 
 	} );
