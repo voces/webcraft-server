@@ -10,17 +10,16 @@ const wss = new WebSocket.Server( { noServer: true } );
 const connections = [];
 let id = 0;
 
-const send = network.send = ( json, time ) => {
+const queue = [];
+let lastTime = 0;
+const _send = () => {
 
-	if ( ! json.type ) return console.error( new Error( "missing message type" ) );
-
-	json.time = time || Date.now();
-	if ( json.type !== "update" || Math.random() < 0.01 )
-		console.log( json );
+	const json = queue.shift();
 
 	const stringified = JSON.stringify( json );
-
-	network.dispatchEvent( json.type, JSON.parse( stringified ) );
+	const parsedJson = JSON.parse( stringified );
+	if ( json.type !== "update" || Math.random() < 0.01 )
+		console.log( parsedJson );
 
 	connections.forEach( connection => {
 
@@ -31,6 +30,31 @@ const send = network.send = ( json, time ) => {
 		} catch ( err ) { /* do nothing */ }
 
 	} );
+
+	try {
+
+		network.dispatchEvent( parsedJson.type, parsedJson );
+
+	} catch ( err ) {
+
+		console.error( err );
+
+	}
+
+	if ( queue.length ) _send();
+	else start();
+
+};
+const send = network.send = ( json, time ) => {
+
+	if ( ! json.type ) return console.error( new Error( "missing message type" ) );
+
+	json.time = lastTime = Math.max( time || Date.now(), lastTime + 1 );
+
+	queue.push( json );
+
+	if ( queue.length > 1 ) return;
+	else _send();
 
 };
 
@@ -70,7 +94,10 @@ wss.on( "connection", ( ws, req ) => {
 	ws.on( "close", () => {
 
 		connections.splice( connections.indexOf( ws ), 1 );
-		send( { type: "disconnection", connection: ws.id } );
+		if ( connections.length )
+			send( { type: "disconnection", connection: ws.id } );
+		else
+			stop();
 
 	} );
 
@@ -78,7 +105,20 @@ wss.on( "connection", ( ws, req ) => {
 
 } );
 
-setInterval( () => connections.length && send( { type: "update" } ), 100 );
+let timeout;
+const stop = () => {
+
+	if ( ! timeout ) return;
+	clearTimeout( timeout );
+	timeout = undefined;
+
+};
+const start = () => {
+
+	stop();
+	timeout = setTimeout( () => send( { type: "update" } ), 100 );
+
+};
 
 export default server => {
 
