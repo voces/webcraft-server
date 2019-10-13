@@ -1,7 +1,11 @@
 
 import WebSocket from "ws";
+import RateLimiter from "./RateLimiter.js";
 import game from "../mvp-bd-client/src/index.js";
 import network from "../mvp-bd-client/src/network.js";
+
+export const LATENCY = 100;
+const MAX_MESSAGE_LENGTH = 2500;
 
 game.receivedState = "host";
 
@@ -79,7 +83,12 @@ wss.on( "connection", ( ws, req ) => {
 
 	connections.push( ws );
 
+	ws.rateLimiter = new RateLimiter();
+
 	ws.on( "message", message => {
+
+		if ( ! ws.rateLimiter.test() ) return console.log( "dropping message due to spam" );
+		if ( message.length > MAX_MESSAGE_LENGTH ) return console.log( "dropping message due to length" );
 
 		try {
 
@@ -115,7 +124,12 @@ const stop = () => {
 const start = () => {
 
 	stop();
-	timeout = setTimeout( () => send( { type: "update" } ), 100 );
+	timeout = setTimeout( () => {
+
+		send( { type: "update" } );
+		connections.forEach( connection => connection.rateLimiter.tick() );
+
+	}, LATENCY );
 
 };
 

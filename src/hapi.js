@@ -2,6 +2,9 @@
 import Hapi from "@hapi/hapi";
 import Joi from "@hapi/joi";
 import { query } from "./mysql.js";
+import RateLimiter from "./RateLimiter.js";
+
+const rateLimiter = new RateLimiter( { recovery: 1, latency: 1, cap: 5 } );
 
 export default server => {
 
@@ -28,6 +31,8 @@ export default server => {
 			response: { emptyStatusCode: 204 },
 			handler: async request => {
 
+				if ( ! rateLimiter.test() ) return "";
+
 				const stack = request.payload.stack;
 				query( "INSERT INTO errors (stack) VALUES ((:stack));", { stack } ).catch( console.error );
 				return "";
@@ -49,3 +54,4 @@ export default server => {
 
 };
 
+setTimeout( () => rateLimiter.tick(), 1000 );
