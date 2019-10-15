@@ -3,6 +3,7 @@ import WebSocket from "ws";
 import RateLimiter from "./RateLimiter.js";
 import game from "../mvp-bd-client/src/index.js";
 import network from "../mvp-bd-client/src/network.js";
+import { verifyToken } from "./tokens.js";
 
 export const LATENCY = 100;
 const MAX_MESSAGE_LENGTH = 2500;
@@ -62,10 +63,17 @@ const send = network.send = ( json, time ) => {
 
 };
 
-wss.on( "connection", ( ws, req ) => {
+wss.on( "connection", async ( ws, req ) => {
 
 	ws.id = id ++;
-	const username = req.url.slice( 2 );
+	const token = req.url.slice( 2 );
+	if ( ! token || ! token.length ) return ws.close();
+
+	const obj = await verifyToken( token ).catch( err => err );
+	if ( ! obj ) return ws.close();
+
+	const { username } = obj;
+
 	ws.username = username || ws.id.toString();
 
 	const time = Date.now();
