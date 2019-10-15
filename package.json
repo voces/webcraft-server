@@ -21,6 +21,8 @@
   "dependencies": {
     "@hapi/hapi": "^18.4.0",
     "@hapi/joi": "^16.1.4",
+    "jsonwebtoken": "^8.5.1",
+    "libsodium-wrappers": "^0.7.5",
     "mysql2": "^1.7.0",
     "ws": "^7.1.2"
   }
