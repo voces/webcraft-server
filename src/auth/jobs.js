@@ -4,7 +4,7 @@ import { query } from "../mysql.js";
 const deleteAccounts = async () => {
 
 	await query( `
-        INSERT INTO users_deleted SELECT *, "inactive" reason FROM users WHERE logged_in_at < NOW() - INTERVAL 3 MONTH;
+        INSERT INTO deleted_users VALUES SELECT *, "inactive" reason FROM users WHERE logged_in_at < NOW() - INTERVAL 3 MONTH;
         DELETE FROM users WHERE logged_in_at < NOW() - INTERVAL 3 MONTH;
     ` ).then( console.log ).catch( console.error );
 
