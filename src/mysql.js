@@ -10,6 +10,7 @@ export const raw = MySQL.createPool( {
 	queueLimit: 0,
 	supportBigNumbers: true,
 	namedPlaceholders: true,
+	multipleStatements: true,
 } );
 
 export const query = ( ...args ) => raw.query( ...args ).then( ( [ result ] ) => result ).catch( err => err );
