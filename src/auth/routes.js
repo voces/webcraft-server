@@ -4,7 +4,7 @@ import { hash, verify } from "./passwords.js";
 import { usernameTaken, unknownUsername, incorrectPassword, rateLimit } from "../errors.js";
 import { injectToken } from "./tokens.js";
 import { query, queryOne } from "../mysql.js";
-import "./jobs.js";
+// import "./jobs.js";
 
 export default ( hapi, rateLimiter ) => {
 
