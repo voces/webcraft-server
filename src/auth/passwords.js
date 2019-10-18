@@ -1,6 +1,5 @@
 
 import libsodium from "libsodium-wrappers";
-import config from "../config.js";
 
 export const hash = async password => {
 
@@ -9,7 +8,7 @@ export const hash = async password => {
 	return libsodium.crypto_pwhash_str(
 		password,
 		libsodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
-		libsodium.crypto_pwhash_MEMLIMIT_SENSITIVE * config.cryptoMemLimitFactor
+		libsodium.crypto_pwhash_MEMLIMIT_INTERACTIVE
 	);
 
 };
