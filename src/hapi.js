@@ -5,6 +5,7 @@ import { query } from "./mysql.js";
 import RateLimiter from "./RateLimiter.js";
 import authRoutes from "./auth/routes.js";
 import config from "./config.js";
+import { rateLimit } from "../errors.js";
 
 const rateLimiter = new RateLimiter( { recovery: 3, latency: 100, cap: 10 } );
 
