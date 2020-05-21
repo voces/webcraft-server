@@ -4,11 +4,11 @@
   "description": "Minimum viable product of Bulldog server",
   "main": "src/index.js",
   "devDependencies": {
-    "babel-eslint": "^10.0.3",
+    "babel-eslint": "^10.1.0",
     "chai": "^4.2.0",
-    "eslint": "^6.4.0",
-    "eslint-config-mdcs": "^4.2.3",
-    "eslint-config-verit": "^1.0.2",
+    "eslint": "^7.0.0",
+    "eslint-config-mdcs": "^5.0.0",
+    "eslint-config-verit": "^1.0.4",
     "verit-test": "^3.1.0"
   },
   "scripts": {
@@ -19,12 +19,12 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@hapi/hapi": "^18.4.0",
-    "@hapi/joi": "^16.1.4",
+    "@hapi/hapi": "^19.1.1",
+    "@hapi/joi": "^17.1.1",
     "chalk": "^4.0.0",
     "jsonwebtoken": "^8.5.1",
-    "libsodium-wrappers": "^0.7.5",
-    "mysql2": "^1.7.0",
-    "ws": "^7.1.2"
+    "libsodium-wrappers": "^0.7.6",
+    "mysql2": "^2.1.0",
+    "ws": "^7.3.0"
   }
 }
