@@ -1,25 +1,46 @@
 
-import libsodium from "libsodium-wrappers";
+import { Worker } from "worker_threads";
+import Path from "path";
+import { fileURLToPath } from "url";
 
-export const hash = async password => {
+const __dirname = Path.dirname( fileURLToPath( import.meta.url ) );
 
-	await libsodium.ready;
+const worker = new Worker( Path.join( __dirname, "passwordsWorker.js" ) );
 
-	return libsodium.crypto_pwhash_str(
-		password,
-		libsodium.crypto_pwhash_OPSLIMIT_INTERACTIVE,
-		libsodium.crypto_pwhash_MEMLIMIT_INTERACTIVE
-	);
+const jobs = [];
+let jobId = 0;
+
+worker.on( "message", ( { id, result } ) => {
+
+	jobs[ id ]( result );
+	delete jobs[ id ];
+
+} );
+
+export const hash = password => {
+
+	const id = jobId ++;
+
+	worker.postMessage( {
+		func: "hash",
+		id,
+		args: [ password ],
+	} );
+
+	return new Promise( resolve => jobs[ id ] = resolve );
 
 };
 
 export const verify = async ( hash, password ) => {
 
-	await libsodium.ready;
+	const id = jobId ++;
 
-	return libsodium.crypto_pwhash_str_verify(
-		hash,
-		password,
-	);
+	worker.postMessage( {
+		func: "verify",
+		id,
+		args: [ hash, password ],
+	} );
+
+	return new Promise( resolve => jobs[ id ] = resolve );
 
 };
