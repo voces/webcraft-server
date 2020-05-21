@@ -4,7 +4,7 @@ const env = process.env.NODE_ENV;
 const config = env === "production" ?
 	{
 		name: "production",
-		port: 80,
+		port: 3627,
 		cors: [ "http://katma.io" ],
 	} :
 	{

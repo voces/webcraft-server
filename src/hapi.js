@@ -1,6 +1,7 @@
 
 import Hapi from "@hapi/hapi";
 import Joi from "@hapi/joi";
+import chalk from "chalk";
 import { query } from "./mysql.js";
 import RateLimiter from "./RateLimiter.js";
 import authRoutes from "./auth/routes.js";
@@ -8,6 +9,15 @@ import config from "./config.js";
 import { rateLimit } from "./errors.js";
 
 const rateLimiter = new RateLimiter( { recovery: 3, latency: 100, cap: 10 } );
+
+const colorizedStatus = status => {
+
+	if ( status < 300 ) return chalk.blue( status );
+	if ( status < 400 ) return chalk.green( status );
+	if ( status < 500 ) return chalk.yellow( status );
+	return chalk.red( status );
+
+};
 
 export default server => {
 
@@ -61,7 +71,7 @@ export default server => {
 			" " +
 			request.path +
 			" --> " +
-			request.response.statusCode
+			colorizedStatus( request.response.statusCode )
 		);
 
 	} );
