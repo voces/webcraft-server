@@ -1,8 +1,8 @@
 
 import WebSocket from "ws";
 import RateLimiter from "./RateLimiter.js";
-import game from "../mvp-bd-client/src/index.js";
-import network from "../mvp-bd-client/src/network.js";
+import { game } from "../mvp-bd-client/public/js/index.js";
+import { network } from "../mvp-bd-client/public/js/network.js";
 import { verifyToken } from "./auth/tokens.js";
 
 export const LATENCY = 100;
