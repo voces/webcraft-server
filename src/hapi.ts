@@ -1,12 +1,13 @@
 import Hapi from "@hapi/hapi";
 import Joi from "@hapi/joi";
 import chalk from "chalk";
-import { query } from "./mysql.js";
+import { logError } from "./mysql.js";
 import RateLimiter from "./RateLimiter.js";
 import authRoutes from "./auth/routes.js";
 import config from "./config.js";
 import { rateLimit } from "./errors.js";
 import { Server } from "http";
+import { HapiPayload } from "./types.js";
 
 const rateLimiter = new RateLimiter({ recovery: 3, latency: 100, cap: 10 });
 
@@ -40,13 +41,11 @@ export default (server: Server): void => {
 					stack: Joi.string().required(),
 				}),
 			},
-			handler: async (request, h) => {
+			handler: async (request: HapiPayload<{ stack: string }>, h) => {
 				if (!rateLimiter.test()) return rateLimit(h);
 
-				const stack = (request.payload as any).stack;
-				query("INSERT INTO errors (stack) VALUES ((:stack));", {
-					stack,
-				}).catch(console.error);
+				const stack = request.payload.stack;
+				logError({ stack }).catch(console.error);
 				return "";
 			},
 		},
@@ -62,7 +61,9 @@ export default (server: Server): void => {
 				" " +
 				request.path +
 				" --> " +
-				colorizedStatus((request.response as any).statusCode),
+				colorizedStatus(
+					(request.response as Hapi.ResponseObject).statusCode,
+				),
 		);
 	});
 };

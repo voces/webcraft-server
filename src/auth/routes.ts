@@ -8,9 +8,14 @@ import {
 	rateLimit,
 } from "../errors.js";
 import { injectToken } from "./tokens.js";
-import { query, queryOne } from "../mysql.js";
+import {
+	fetchUserPassword,
+	logUserLogin,
+	fetchUser,
+	registerUser,
+} from "../mysql.js";
 import RateLimiter from "../RateLimiter.js";
-// import "./jobs.js";
+import { HapiPayload } from "../types.js";
 
 export default (hapi: Hapi.Server, rateLimiter: RateLimiter): void => {
 	hapi.route({
@@ -22,17 +27,16 @@ export default (hapi: Hapi.Server, rateLimiter: RateLimiter): void => {
 					username: Joi.string().allow("").required(),
 				}),
 			},
-			handler: async (request, h) => {
+			handler: async (request: HapiPayload<{ username: string }>, h) => {
 				if (!rateLimiter.test(1.5)) return rateLimit(h);
 
-				const username: string = (request.payload as any).username;
+				const username: string = request.payload.username;
 
 				if (username === "") return injectToken({ username: "tim" });
 
-				const exists = await queryOne(
-					"SELECT 1 FROM users WHERE username = :username;",
-					{ username },
-				).catch(console.error);
+				const exists = await fetchUser({ username }).catch(
+					console.error,
+				);
 
 				if (!exists)
 					return injectToken({
@@ -54,35 +58,28 @@ export default (hapi: Hapi.Server, rateLimiter: RateLimiter): void => {
 					password: Joi.string().required(),
 				}),
 			},
-			handler: async (request, h) => {
+			handler: async (
+				request: HapiPayload<{ username: string; password: string }>,
+				h,
+			) => {
 				if (!rateLimiter.test(3)) return rateLimit(h);
 
-				const {
-					username,
-					password,
-				}: {
-					username: string;
-					password: string;
-				} = request.payload as any;
+				const { username, password } = request.payload;
 
-				const row = await queryOne(
-					"SELECT password FROM users WHERE username = :username;",
-					{ username },
-				).catch(console.error);
+				const row = await fetchUserPassword({ username }).catch(
+					console.error,
+				);
 
 				if (!row) return unknownUsername(h);
 
 				const match = await verify(
-					(row as any).password.toString("utf-8"),
+					row.password.toString("utf-8"),
 					password,
 				);
 
 				if (!match) return incorrectPassword(h);
 
-				query(
-					"UPDATE users SET logged_in_at = NOW() WHERE username = :username;",
-					{ username },
-				);
+				logUserLogin({ username });
 
 				return injectToken({ username });
 			},
@@ -99,32 +96,25 @@ export default (hapi: Hapi.Server, rateLimiter: RateLimiter): void => {
 					password: Joi.string().required(),
 				}),
 			},
-			handler: async (request, h) => {
+			handler: async (
+				request: HapiPayload<{ username: string; password: string }>,
+				h,
+			) => {
 				if (!rateLimiter.test(3)) return rateLimit(h);
 
-				const {
-					username,
-					password,
-				}: {
-					username: string;
-					password: string;
-				} = request.payload as any;
+				const { username, password } = request.payload;
 
 				if (username.toLowerCase() === "tim") return usernameTaken(h);
 
-				const exists = await queryOne(
-					"SELECT 1 FROM users WHERE username = :username;",
-					{ username },
-				).catch(console.error);
+				const exists = await fetchUser({ username }).catch(
+					console.error,
+				);
 
 				if (exists) return usernameTaken(h);
 
 				const hashedPassword = await hash(password);
 
-				await query(
-					"INSERT INTO users (username, password) VALUES (:username, :password);",
-					{ username, password: hashedPassword },
-				);
+				await registerUser({ username, password: hashedPassword });
 
 				return injectToken({ username });
 			},
