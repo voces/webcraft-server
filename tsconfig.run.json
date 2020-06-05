@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"outDir": "dist",
+		"baseUrl": "src",
+		"allowJs": true,
+		"target": "es5",
+		"lib": [ "es2019", "es2020", "DOM" ],
+		"moduleResolution": "node",
+		"module": "ES6",
+		"strict": true,	
+		"noImplicitAny": true,
+		"noImplicitThis": true,
+		"alwaysStrict": true,
+		"strictNullChecks": true,
+		"paths": { "*": [
+			"../node_modules/*/src/index",
+			"../node_modules/*/lib/index",
+			"../node_modules/*/index",
+			"../node_modules/*/dist/index"
+		] },
+		"esModuleInterop": true,
+		"types": []
+	},
+	"include": ["src"],
+	"exclude": [
+		"node_modules",
+		"src/**/*.test.ts",
+		"src/test"
+	]
+}
