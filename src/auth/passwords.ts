@@ -7,7 +7,7 @@ const __dirname = Path.dirname(fileURLToPath(import.meta.url));
 const worker = new Worker(Path.join(__dirname, "passwordsWorker.js"));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const jobs: ((result: any) => void)[] = [];
+const jobs: ((data: any) => void)[] = [];
 let jobId = 0;
 
 worker.on("message", ({ id, result }) => {

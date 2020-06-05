@@ -12,7 +12,7 @@ export const raw = MySQL.createPool({
 	multipleStatements: true,
 });
 
-export const query = (
+const query = (
 	query: string,
 	values?: Record<string, string | number>,
 ): Promise<RowDataPacket[] | RowDataPacket[][] | OkPacket | OkPacket[]> =>
@@ -21,7 +21,7 @@ export const query = (
 		.then(([result]) => result)
 		.catch((err) => err);
 
-export const queryOne = (
+const queryOne = (
 	...args: Parameters<typeof query>
 ): Promise<MySQL.RowDataPacket | MySQL.OkPacket | MySQL.RowDataPacket[]> =>
 	query(...args).then((result) => {
@@ -29,11 +29,44 @@ export const queryOne = (
 		return result[0];
 	});
 
-export default new Proxy(raw, {
-	get: (obj, prop: keyof typeof raw | "queryOne") => {
-		if (prop === "query") return query;
-		if (prop === "queryOne") return query;
+const typedQueryOne = <Values extends Record<string, string | number>, Return>(
+	query: string,
+) => (values: Values): Promise<Return> =>
+	queryOne(query, values) as Promise<Return>;
 
-		return obj[prop];
-	},
-});
+const emptyTypedQueryOne = <Return>(query: string) => (): Promise<Return> =>
+	queryOne(query) as Promise<Return>;
+
+// users
+
+export const fetchUser = typedQueryOne<
+	{ username: string },
+	{ username: string } | undefined
+>("SELECT username FROM users WHERE username = :username;");
+
+export const fetchUserPassword = typedQueryOne<
+	{ username: string },
+	{ password: Buffer } | undefined
+>("SELECT password FROM users WHERE username = :username;");
+
+export const registerUser = typedQueryOne<
+	{ username: string; password: string },
+	MySQL.OkPacket
+>("INSERT INTO users (username, password) VALUES (:username, :password);");
+
+export const logUserLogin = typedQueryOne<{ username: string }, MySQL.OkPacket>(
+	"UPDATE users SET logged_in_at = NOW() WHERE username = :username;",
+);
+
+export const deletedInactiveAccounts = emptyTypedQueryOne<
+	[MySQL.OkPacket, MySQL.OkPacket]
+>(`
+	INSERT INTO deleted_users VALUES SELECT *, "inactive" reason FROM users WHERE logged_in_at < NOW() - INTERVAL 3 MONTH;
+	DELETE FROM users WHERE logged_in_at < NOW() - INTERVAL 3 MONTH;
+`);
+
+// Errors
+
+export const logError = typedQueryOne<{ stack: string }, MySQL.OkPacket>(
+	"INSERT INTO errors (stack) VALUES ((:stack));",
+);
