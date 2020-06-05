@@ -44,7 +44,6 @@
     "jsonwebtoken": "^8.5.1",
     "libsodium-wrappers": "^0.7.6",
     "mysql2": "^2.1.0",
-    "typesafe-joi": "^2.1.0",
     "ws": "^7.3.0"
   }
 }
