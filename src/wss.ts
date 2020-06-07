@@ -21,10 +21,11 @@ const wss = new WebSocket.Server({ noServer: true });
 const connections: WebSocketConnection[] = [];
 let id = 0;
 
-const queue: any[] = [];
+const queue: Record<string, unknown>[] = [];
 let lastTime = 0;
 const _send = () => {
 	const json = queue.shift();
+	if (!json) return;
 
 	const stringified = JSON.stringify(json);
 	const parsedJson = JSON.parse(stringified);
