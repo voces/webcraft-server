@@ -1,9 +1,12 @@
 import WebSocket from "ws";
 import RateLimiter from "./RateLimiter.js";
-import { game } from "../mvp-bd-client/public/js/index.js";
-import { network } from "../mvp-bd-client/public/js/network.js";
 import { verifyToken } from "./auth/tokens.js";
 import { Server } from "http";
+import "../mvp-bd-client/public/js/index.js";
+import { context } from "../mvp-bd-client/public/js/superContext.js";
+
+const { game } = context;
+const network = game.__UNSAFE_network;
 
 type WebSocketConnection = WebSocket & {
 	id: number;
