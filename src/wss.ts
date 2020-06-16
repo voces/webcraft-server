@@ -2,11 +2,11 @@ import WebSocket from "ws";
 import RateLimiter from "./RateLimiter.js";
 import { verifyToken } from "./auth/tokens.js";
 import { Server } from "http";
-import "../mvp-bd-client/public/js/index.js";
-import { context } from "../mvp-bd-client/public/js/superContext.js";
+import { Network } from "../mvp-bd-client/public/js/Network.js";
+import { Game } from "../mvp-bd-client/public/js/Game.js";
 
-const { game } = context;
-const network = game.__UNSAFE_network;
+const network = new Network();
+const game = new Game(network);
 
 type WebSocketConnection = WebSocket & {
 	id: number;
@@ -138,7 +138,7 @@ const start = () => {
 	}, LATENCY);
 };
 
-export default (server: Server) => {
+export default (server: Server): void => {
 	server.on("upgrade", (request, socket, head) =>
 		wss.handleUpgrade(request, socket, head, (ws) =>
 			wss.emit("connection", ws, request),
