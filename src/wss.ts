@@ -14,7 +14,7 @@ type WebSocketConnection = WebSocket & {
 	rateLimiter: RateLimiter;
 };
 
-export const LATENCY = 100;
+export const LATENCY = 50;
 const MAX_MESSAGE_LENGTH = 2500;
 
 game.receivedState = "host";
