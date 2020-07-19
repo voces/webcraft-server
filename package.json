@@ -4,30 +4,30 @@
   "description": "Minimum viable product of Bulldog server",
   "main": "src/index.ts",
   "devDependencies": {
-    "@babel/preset-env": "^7.9.6",
+    "@babel/preset-env": "^7.10.4",
     "@types/hapi__hapi": "^19.0.3",
-    "@types/jest": "^25.2.3",
+    "@types/jest": "^26.0.5",
     "@types/joi": "^14.3.4",
     "@types/jsonwebtoken": "^8.5.0",
     "@types/libsodium-wrappers": "^0.7.7",
     "@types/mysql2": "github:types/mysql2",
-    "@types/node": "^14.0.9",
-    "@types/ws": "^7.2.5",
-    "@typescript-eslint/eslint-plugin": "^3.0.2",
-    "@typescript-eslint/parser": "^3.0.2",
+    "@types/node": "^14.0.23",
+    "@types/ws": "^7.2.6",
+    "@typescript-eslint/eslint-plugin": "^3.6.1",
+    "@typescript-eslint/parser": "^3.6.1",
     "babel-eslint": "^10.1.0",
-    "eslint": "^7.1.0",
+    "eslint": "^7.5.0",
     "eslint-config-mdcs": "^5.0.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-config-verit": "^1.0.4",
-    "eslint-plugin-prettier": "^3.1.3",
-    "jest": "^26.0.1",
+    "eslint-plugin-prettier": "^3.1.4",
+    "jest": "^26.1.0",
     "jest-ts-webcompat-resolver": "^1.0.0",
     "prettier": "^2.0.5",
-    "ts-jest": "^26.0.0",
+    "ts-jest": "^26.1.3",
     "ts-node": "^8.10.2",
-    "tsc-watch": "^4.2.8",
-    "typescript": "^3.9.3"
+    "tsc-watch": "^4.2.9",
+    "typescript": "^3.9.7"
   },
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
@@ -39,12 +39,12 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@hapi/hapi": "^19.1.1",
+    "@hapi/hapi": "^19.2.0",
     "@hapi/joi": "^17.1.1",
-    "chalk": "^4.0.0",
+    "chalk": "^4.1.0",
     "jsonwebtoken": "^8.5.1",
     "libsodium-wrappers": "^0.7.6",
     "mysql2": "^2.1.0",
-    "ws": "^7.3.0"
+    "ws": "^7.3.1"
   }
 }
