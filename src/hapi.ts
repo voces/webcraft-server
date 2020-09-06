@@ -8,6 +8,9 @@ import config from "./config.js";
 import { rateLimit } from "./errors.js";
 import { Server } from "http";
 import { HapiPayload } from "./types.js";
+import inert from "@hapi/inert";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
 const rateLimiter = new RateLimiter({ recovery: 3, latency: 100, cap: 10 });
 
@@ -28,8 +31,17 @@ export default (server: Server): void => {
 					throw err;
 				},
 			},
+			files: {
+				relativeTo: join(
+					dirname(fileURLToPath(import.meta.url)),
+					"..",
+					"public",
+				),
+			},
 		},
 	});
+
+	hapi.register(inert);
 
 	hapi.route({
 		method: "POST",
@@ -52,6 +64,12 @@ export default (server: Server): void => {
 	});
 
 	authRoutes(hapi, rateLimiter);
+
+	hapi.route({
+		method: "GET",
+		path: "/{param*}",
+		handler: { directory: { path: "." } },
+	});
 
 	hapi.events.on("response", (request) => {
 		console.log(

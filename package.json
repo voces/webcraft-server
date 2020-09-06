@@ -6,6 +6,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.10.4",
     "@types/hapi__hapi": "^19.0.3",
+    "@types/hapi__inert": "^5.2.0",
     "@types/jest": "^26.0.5",
     "@types/joi": "^14.3.4",
     "@types/jsonwebtoken": "^8.5.0",
@@ -40,6 +41,7 @@
   "type": "module",
   "dependencies": {
     "@hapi/hapi": "^19.2.0",
+    "@hapi/inert": "^6.0.2",
     "@hapi/joi": "^17.1.1",
     "chalk": "^4.1.0",
     "jsonwebtoken": "^8.5.1",
