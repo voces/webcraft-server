@@ -1,5 +1,5 @@
 import Hapi from "@hapi/hapi";
-import Joi from "@hapi/joi";
+import Joi from "joi";
 import chalk from "chalk";
 import { logError } from "./mysql.js";
 import RateLimiter from "./RateLimiter.js";
