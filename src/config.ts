@@ -5,7 +5,7 @@ const config =
 		? {
 				name: "production",
 				port: 3627,
-				cors: ["http://katma.io"],
+				cors: ["https://katma.io"],
 		  }
 		: {
 				name: "local",
