@@ -21,6 +21,8 @@ const colorizedStatus = (status: number) => {
 	return chalk.red(status);
 };
 
+console.log(join(dirname(fileURLToPath(import.meta.url)), "..", "public"));
+
 export default (server: Server): void => {
 	const hapi = Hapi.server({
 		listener: server,
@@ -67,8 +69,8 @@ export default (server: Server): void => {
 
 	hapi.route({
 		method: "GET",
-		path: "/{param*}",
-		handler: { directory: { path: "." } },
+		path: "/.well-known/{param*}",
+		handler: { directory: { path: "./.well-known", index: true } },
 	});
 
 	hapi.events.on("response", (request) => {
