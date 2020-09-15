@@ -41,6 +41,7 @@ export default (server: Server): void => {
 				),
 			},
 		},
+		debug: { request: ["error"] },
 	});
 
 	hapi.register(inert);

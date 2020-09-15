@@ -32,5 +32,5 @@ export const unknownUsername = (h: Hapi.ResponseToolkit): Hapi.ResponseObject =>
 export const rateLimit = (h: Hapi.ResponseToolkit): Hapi.ResponseObject =>
 	h.response({
 		code: 3,
-		message: "Slow down th enumber of requests.",
+		message: "Slow down the number of requests.",
 	});

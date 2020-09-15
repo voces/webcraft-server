@@ -25,7 +25,7 @@ const queryOne = (
 	...args: Parameters<typeof query>
 ): Promise<MySQL.RowDataPacket | MySQL.OkPacket | MySQL.RowDataPacket[]> =>
 	query(...args).then((result) => {
-		if (!Array.isArray(result)) throw new Error("expected an array");
+		if (!Array.isArray(result)) return result;
 		return result[0];
 	});
 
