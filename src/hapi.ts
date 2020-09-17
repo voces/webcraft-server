@@ -15,7 +15,6 @@ import { fileURLToPath } from "url";
 const rateLimiter = new RateLimiter({ recovery: 3, latency: 100, cap: 10 });
 
 const colorizedStatus = (status: number) => {
-	if (status < 300) return chalk.blue(status);
 	if (status < 400) return chalk.green(status);
 	if (status < 500) return chalk.yellow(status);
 	return chalk.red(status);
@@ -41,7 +40,6 @@ export default (server: Server): void => {
 				),
 			},
 		},
-		debug: { request: ["error"] },
 	});
 
 	hapi.register(inert);
@@ -75,16 +73,16 @@ export default (server: Server): void => {
 	});
 
 	hapi.events.on("response", (request) => {
+		const response = request.response as Hapi.ResponseObject;
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const error: Error | undefined = (response as any)._error;
+		if (error) console.error(error);
+
 		console.log(
-			request.info.remoteAddress +
-				": " +
-				request.method.toUpperCase() +
-				" " +
-				request.path +
-				" --> " +
-				colorizedStatus(
-					(request.response as Hapi.ResponseObject).statusCode,
-				),
+			`${request.info.remoteAddress}: ${request.method.toUpperCase()} ${
+				request.path
+			} --> ${colorizedStatus(response.statusCode)}`,
 		);
 	});
 };

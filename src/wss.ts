@@ -2,8 +2,7 @@ import WebSocket from "ws";
 import RateLimiter from "./RateLimiter.js";
 import { verifyToken } from "./auth/tokens.js";
 import { Server } from "http";
-import { Network } from "../mvp-bd-client/public/js/network.js";
-import { Game } from "../mvp-bd-client/public/js/Game.js";
+import { Network, Game } from "../mvp-bd-client/public/js/server.js";
 
 const network = new Network();
 const game = new Game(network);
