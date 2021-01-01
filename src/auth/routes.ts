@@ -1,21 +1,22 @@
 import Hapi from "@hapi/hapi";
 import Joi from "joi";
-import { hash, verify } from "./passwords.js";
+
 import {
-	usernameTaken,
-	unknownUsername,
 	incorrectPassword,
 	rateLimit,
+	unknownUsername,
+	usernameTaken,
 } from "../errors.js";
-import { injectToken } from "./tokens.js";
 import {
+	fetchUser,
 	fetchUserPassword,
 	logUserLogin,
-	fetchUser,
 	registerUser,
 } from "../mysql.js";
 import RateLimiter from "../RateLimiter.js";
 import { HapiPayload } from "../types.js";
+import { hash, verify } from "./passwords.js";
+import { injectToken } from "./tokens.js";
 
 export default (hapi: Hapi.Server, rateLimiter: RateLimiter): void => {
 	hapi.route({

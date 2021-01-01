@@ -5,10 +5,7 @@
  * @returns {Promise<{ format: string }>}
  */
 export async function getFormat(url, context, defaultGetFormat) {
-	if (url.includes("node_modules/three/src"))
-		return {
-			format: "module",
-		};
+	if (url.includes("node_modules/three/src")) return { format: "module" };
 
 	return defaultGetFormat(url, context, defaultGetFormat);
 }

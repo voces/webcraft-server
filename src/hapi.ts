@@ -1,16 +1,17 @@
 import Hapi from "@hapi/hapi";
-import Joi from "joi";
+import inert from "@hapi/inert";
 import chalk from "chalk";
-import { logError } from "./mysql.js";
-import RateLimiter from "./RateLimiter.js";
+import { Server } from "http";
+import Joi from "joi";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+
 import authRoutes from "./auth/routes.js";
 import config from "./config.js";
 import { rateLimit } from "./errors.js";
-import { Server } from "http";
+import { logError } from "./mysql.js";
+import RateLimiter from "./RateLimiter.js";
 import { HapiPayload } from "./types.js";
-import inert from "@hapi/inert";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
 
 const rateLimiter = new RateLimiter({ recovery: 3, latency: 100, cap: 10 });
 

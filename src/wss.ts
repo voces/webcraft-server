@@ -1,11 +1,12 @@
-import WebSocket from "ws";
-import RateLimiter from "./RateLimiter.js";
-import { verifyToken } from "./auth/tokens.js";
 import { Server } from "http";
-import { Network, Game } from "../mvp-bd-client/public/js/server.js";
+import WebSocket from "ws";
+
+import { Katma, Network } from "../mvp-bd-client/public/js/server.js";
+import { verifyToken } from "./auth/tokens.js";
+import RateLimiter from "./RateLimiter.js";
 
 const network = new Network();
-const game = new Game(network);
+const game = new Katma(network);
 
 type WebSocketConnection = WebSocket & {
 	id: number;
@@ -70,7 +71,7 @@ wss.on("connection", async (ws: WebSocketConnection, req) => {
 	const obj: { username: string } = await verifyToken(token).catch(
 		(err) => err,
 	);
-	if (!obj) return ws.close();
+	if (!obj || obj instanceof Error) return ws.close();
 
 	const { username } = obj;
 

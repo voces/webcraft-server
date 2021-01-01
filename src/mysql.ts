@@ -1,4 +1,4 @@
-import MySQL, { RowDataPacket, OkPacket } from "mysql2/promise.js";
+import MySQL, { OkPacket, RowDataPacket } from "mysql2/promise";
 
 export const raw = MySQL.createPool({
 	host: "localhost",

@@ -1,5 +1,5 @@
-import { parentPort } from "worker_threads";
 import libsodium from "libsodium-wrappers";
+import { parentPort } from "worker_threads";
 
 if (!parentPort) throw new Error("not run as a worker");
 

@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+
 import secret from "./secret.js";
 
 export const injectToken = <T extends Parameters<typeof jwt.sign>[0]>(
@@ -7,13 +8,14 @@ export const injectToken = <T extends Parameters<typeof jwt.sign>[0]>(
 	Object.assign(obj, { token: jwt.sign(obj, secret) });
 
 export const verifyToken = (token: string): Promise<Record<string, unknown>> =>
-	new Promise((resolve) => {
+	new Promise((resolve, reject) => {
 		try {
 			jwt.verify(token, secret, (err, result) => {
-				if (err) return resolve();
+				if (err) return reject(err);
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				resolve(result as any);
 			});
 		} catch (err) {
-			resolve();
+			reject(err);
 		}
 	});
