@@ -33,7 +33,8 @@ export default (hapi: Hapi.Server, rateLimiter: RateLimiter): void => {
 
 				const username: string = request.payload.username;
 
-				if (username === "") return injectToken({ username: "tim" });
+				if (username === "")
+					return injectToken({ username: "tim", room: "katma" });
 
 				const exists = await fetchUser({ username }).catch(
 					console.error,
@@ -42,6 +43,7 @@ export default (hapi: Hapi.Server, rateLimiter: RateLimiter): void => {
 				if (!exists)
 					return injectToken({
 						username: username + "*",
+						room: "katma",
 					});
 
 				return usernameTaken(h);
@@ -82,7 +84,7 @@ export default (hapi: Hapi.Server, rateLimiter: RateLimiter): void => {
 
 				logUserLogin({ username });
 
-				return injectToken({ username });
+				return injectToken({ username, room: "katma" });
 			},
 		},
 	});
@@ -117,7 +119,7 @@ export default (hapi: Hapi.Server, rateLimiter: RateLimiter): void => {
 
 				await registerUser({ username, password: hashedPassword });
 
-				return injectToken({ username });
+				return injectToken({ username, room: "katma" });
 			},
 		},
 	});

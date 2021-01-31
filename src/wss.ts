@@ -1,80 +1,43 @@
 import { Server } from "http";
 import WebSocket from "ws";
 
-import { Katma, Network } from "../mvp-bd-client/public/js/server.js";
 import { verifyToken } from "./auth/tokens.js";
+import { createKatma } from "./games/katma.js";
 import RateLimiter from "./RateLimiter.js";
+import { Room } from "./rooms.js";
+import { WebSocketConnection } from "./types.js";
 
-const network = new Network();
-const game = new Katma(network);
-
-type WebSocketConnection = WebSocket & {
-	id: number;
-	username: string;
-	rateLimiter: RateLimiter;
-};
-
-export const LATENCY = 50;
 const MAX_MESSAGE_LENGTH = 2500;
-
-game.receivedState = "host";
 
 const wss = new WebSocket.Server({ noServer: true });
 
-const connections: WebSocketConnection[] = [];
+const rooms: Record<string, Room> = {};
+
 let id = 0;
-
-const queue: Record<string, unknown>[] = [];
-let lastTime = 0;
-const _send = () => {
-	const json = queue.shift();
-	if (!json) return;
-
-	const stringified = JSON.stringify(json);
-	const parsedJson = JSON.parse(stringified);
-	if (json.type !== "update" || Math.random() < 0.01) console.log(parsedJson);
-
-	connections.forEach((connection) => {
-		try {
-			connection.send(stringified);
-		} catch (err) {
-			/* do nothing */
-		}
-	});
-
-	try {
-		network.dispatchEvent(parsedJson.type, parsedJson);
-	} catch (err) {
-		console.error(err);
+wss.on("connection", async (ws: WebSocketConnection, req) => {
+	const token = req.url?.slice(2);
+	if (!token || !token.length) {
+		console.log(new Date(), "Dropping client without token");
+		return ws.close();
 	}
 
-	if (queue.length) _send();
-	else start();
-};
+	const obj: { username: string; room: string } = await verifyToken(
+		token,
+	).catch((err) => err);
+	if (!obj || obj instanceof Error) {
+		console.log(new Date(), "Dropping client with invalid token");
+		return ws.close();
+	}
 
-const send = (network.send = (json: Record<string, unknown>, time?: number) => {
-	if (!json.type) return console.error(new Error("missing message type"));
+	const { username, room: roomId } = obj;
 
-	json.time = lastTime = Math.max(time || Date.now(), lastTime + 1);
+	const room = rooms[roomId];
+	if (!room) {
+		console.log(new Date(), "Dropping client with invalid room");
+		return ws.close();
+	}
 
-	queue.push(json);
-
-	if (queue.length > 1) return;
-	else _send();
-});
-
-wss.on("connection", async (ws: WebSocketConnection, req) => {
 	ws.id = id++;
-	const token = req.url?.slice(2);
-	if (!token || !token.length) return ws.close();
-
-	const obj: { username: string } = await verifyToken(token).catch(
-		(err) => err,
-	);
-	if (!obj || obj instanceof Error) return ws.close();
-
-	const { username } = obj;
-
 	ws.username = username || ws.id.toString();
 
 	const time = Date.now();
@@ -83,16 +46,16 @@ wss.on("connection", async (ws: WebSocketConnection, req) => {
 		ws.send(
 			JSON.stringify({
 				type: "init",
-				connections: connections.length,
+				connections: room.connections.length,
 				time,
-				state: game,
+				state: room.state,
 			}),
 		);
 	} catch (err) {
 		/* do nothing */
 	}
 
-	connections.push(ws);
+	room.addConnection(ws);
 
 	ws.rateLimiter = new RateLimiter();
 
@@ -105,38 +68,19 @@ wss.on("connection", async (ws: WebSocketConnection, req) => {
 		try {
 			const json = JSON.parse(message);
 			json.connection = ws.id;
-			send(json);
+			room.send(json);
 		} catch (err) {
 			/* do nothing */
 		}
 	});
 
-	ws.on("close", () => {
-		connections.splice(connections.indexOf(ws), 1);
-		send({ type: "disconnection", connection: ws.id });
-		if (connections.length === 0) stop();
-	});
+	ws.on("close", () => room.removeConnection(ws));
 
-	send(
+	room.send(
 		{ type: "connection", connection: ws.id, username: ws.username },
 		time,
 	);
 });
-
-let timeout: NodeJS.Timeout | undefined;
-const stop = () => {
-	if (!timeout) return;
-	clearTimeout(timeout);
-	timeout = undefined;
-};
-
-const start = () => {
-	stop();
-	timeout = setTimeout(() => {
-		send({ type: "update" });
-		connections.forEach((connection) => connection.rateLimiter.tick());
-	}, LATENCY);
-};
 
 export default (server: Server): void => {
 	server.on("upgrade", (request, socket, head) =>
@@ -144,4 +88,6 @@ export default (server: Server): void => {
 			wss.emit("connection", ws, request),
 		),
 	);
+
+	rooms.katma = createKatma();
 };

@@ -35,7 +35,7 @@
     "build": "tsc --project tsconfig.build.json",
     "dev": "tsc-watch --project tsconfig.build.json --onSuccess \"npm start\"",
     "lint": "eslint 'src/**/*.ts' --quiet --fix",
-    "start": "node --experimental-loader ./loader.mjs dist/index.js",
+    "start": "node --experimental-loader ./loader.mjs dist/src/index.js",
     "test": "vt **/*.test.js --no-parallel"
   },
   "license": "ISC",

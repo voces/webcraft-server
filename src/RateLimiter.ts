@@ -1,4 +1,4 @@
-import { LATENCY } from "./wss.js";
+import { LATENCY } from "./rooms.js";
 
 const CAP = 50;
 const RECOVERY = 10;

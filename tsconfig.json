@@ -7,10 +7,6 @@
 		"moduleResolution": "node",
 		"strict": true,
 		"module": "ESNext",
-		"noImplicitAny": true,
-		"noImplicitThis": true,
-		"alwaysStrict": true,
-		"strictNullChecks": true,
 		"paths": {
 			"*": [
 				"../node_modules/*/src/index",
