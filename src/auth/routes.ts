@@ -26,25 +26,27 @@ export default (hapi: Hapi.Server, rateLimiter: RateLimiter): void => {
 			validate: {
 				payload: Joi.object({
 					username: Joi.string().allow("").required(),
+					room: Joi.string(),
 				}),
 			},
-			handler: async (request: HapiPayload<{ username: string }>, h) => {
+			handler: async (
+				request: HapiPayload<{ username: string; room?: string }>,
+				h,
+			) => {
 				if (!rateLimiter.test(1.5)) return rateLimit(h);
 
-				const username: string = request.payload.username;
+				const username = request.payload.username;
+				const room = request.payload.room || "katma";
 
 				if (username === "")
-					return injectToken({ username: "tim", room: "katma" });
+					return injectToken({ username: "tim", room });
 
 				const exists = await fetchUser({ username }).catch(
 					console.error,
 				);
 
 				if (!exists)
-					return injectToken({
-						username: username + "*",
-						room: "katma",
-					});
+					return injectToken({ username: username + "*", room });
 
 				return usernameTaken(h);
 			},
@@ -59,15 +61,21 @@ export default (hapi: Hapi.Server, rateLimiter: RateLimiter): void => {
 				payload: Joi.object({
 					username: Joi.string().required(),
 					password: Joi.string().required(),
+					room: Joi.string(),
 				}),
 			},
 			handler: async (
-				request: HapiPayload<{ username: string; password: string }>,
+				request: HapiPayload<{
+					username: string;
+					password: string;
+					room?: string;
+				}>,
 				h,
 			) => {
 				if (!rateLimiter.test(3)) return rateLimit(h);
 
 				const { username, password } = request.payload;
+				const room = request.payload.room ?? "katma";
 
 				const row = await fetchUserPassword({ username }).catch(
 					console.error,
@@ -84,7 +92,7 @@ export default (hapi: Hapi.Server, rateLimiter: RateLimiter): void => {
 
 				logUserLogin({ username });
 
-				return injectToken({ username, room: "katma" });
+				return injectToken({ username, room });
 			},
 		},
 	});

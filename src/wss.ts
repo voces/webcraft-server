@@ -3,6 +3,7 @@ import WebSocket from "ws";
 
 import { verifyToken } from "./auth/tokens.js";
 import { createKatma } from "./games/katma.js";
+import { createMazingContest } from "./games/mazingcontest.js";
 import RateLimiter from "./RateLimiter.js";
 import { Room } from "./rooms.js";
 import { WebSocketConnection } from "./types.js";
@@ -90,4 +91,5 @@ export default (server: Server): void => {
 	);
 
 	rooms.katma = createKatma();
+	rooms.mazingcontest = createMazingContest();
 };

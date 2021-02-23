@@ -1,4 +1,4 @@
-import { Game } from "../mvp-bd-client/public/js/Game.js";
+import { Game } from "../mvp-bd-client/public/mazingcontest/js/server.js";
 import { WebSocketConnection } from "./types.js";
 
 export const LATENCY = 50;
@@ -35,7 +35,7 @@ export const initializeGame = <T extends Game>(game: T): Room => {
 		});
 
 		try {
-			game.network.dispatchEvent(parsedJson.type, parsedJson);
+			game.__UNSAFE_network.dispatchEvent(parsedJson.type, parsedJson);
 		} catch (err) {
 			console.error(err);
 		}
@@ -44,7 +44,7 @@ export const initializeGame = <T extends Game>(game: T): Room => {
 		else start();
 	};
 
-	const send = (game.network.send = (
+	const send = (game.__UNSAFE_network.send = (
 		json: Record<string, unknown>,
 		time?: number,
 	) => {
@@ -76,7 +76,7 @@ export const initializeGame = <T extends Game>(game: T): Room => {
 	return {
 		connections,
 		send,
-		state: game,
+		state: { toJSON: () => game.toJSON() },
 		stop,
 		addConnection: (ws) => connections.push(ws),
 		removeConnection: (ws) => {
