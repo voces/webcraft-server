@@ -1,8 +1,10 @@
 import {
 	MazingContest,
 	Network,
-} from "../../mvp-bd-client/public/mazingcontest/js/server.js";
+} from "../../mvp-bd-client/public/mazingcontest/server.js";
+import type { Game } from "../../mvp-bd-client/src/engine/Game.js";
 import { initializeGame, Room } from "../rooms.js";
 
 export const createMazingContest = (): Room =>
-	initializeGame(new MazingContest(new Network()));
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	initializeGame((new MazingContest(new Network()) as any) as Game);

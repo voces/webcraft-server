@@ -1,7 +1,7 @@
 import { Server } from "http";
 import WebSocket from "ws";
 
-import { verifyToken } from "./auth/tokens.js";
+import { verifyToken } from "./api/routes/auth/tokens.js";
 import { createKatma } from "./games/katma.js";
 import { createMazingContest } from "./games/mazingcontest.js";
 import RateLimiter from "./RateLimiter.js";

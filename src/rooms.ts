@@ -1,4 +1,4 @@
-import { Game } from "../mvp-bd-client/public/mazingcontest/js/server.js";
+import type { Game } from "../mvp-bd-client/src/engine/Game";
 import { WebSocketConnection } from "./types.js";
 
 export const LATENCY = 50;

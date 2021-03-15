@@ -6,15 +6,15 @@ import {
 	rateLimit,
 	unknownUsername,
 	usernameTaken,
-} from "../errors.js";
+} from "../../../errors.js";
 import {
 	fetchUser,
 	fetchUserPassword,
 	logUserLogin,
 	registerUser,
-} from "../mysql.js";
-import RateLimiter from "../RateLimiter.js";
-import { HapiPayload } from "../types.js";
+} from "../../../mysql.js";
+import RateLimiter from "../../../RateLimiter.js";
+import { HapiPayload } from "../../../types.js";
 import { hash, verify } from "./passwords.js";
 import { injectToken } from "./tokens.js";
 
