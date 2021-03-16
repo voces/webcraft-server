@@ -11,6 +11,7 @@ const colorizedStatus = (status: number) => {
 export const log: Route = {
 	handler: async ({ request, response, result }) => {
 		console.log(
+			new Date(),
 			`${
 				request.socket.remoteAddress
 			}: ${request.method?.toUpperCase()} ${

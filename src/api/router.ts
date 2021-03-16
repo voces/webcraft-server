@@ -58,6 +58,7 @@ export type InternalRoute<
 	Params extends EmptyObject = EmptyObject
 > = RouteBase<Response, Validation, Params> & {
 	path?: (path: string) => Params | undefined;
+	rawPath?: string;
 	handlesErrors: boolean;
 } & ValidationProps<Validation, Params>;
 
@@ -79,6 +80,9 @@ export type Route<
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const _routes: InternalRoute<unknown, unknown, any>[] = [];
 
+const escapeRegex = (string: string) =>
+	string.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
+
 /**
  * Registers a route/middleware. Routes are processed in the order they are
  * registered, and all matched routes will be invoked.
@@ -88,8 +92,10 @@ export const register = <Response, Validation, Params>(
 ): void => {
 	let path;
 	if (config.path) {
-		const regexp = new RegExp(config.path.replace(/:\w+/g, "(.*)"));
-		const params = Array.from(config.path.matchAll(/:w+/g)).map((v) =>
+		const regexp = new RegExp(
+			escapeRegex(config.path).replace(/:\w+/g, "(.*)"),
+		);
+		const params = Array.from(config.path.matchAll(/:\w+/g)).map((v) =>
 			v[0].slice(1),
 		);
 		path = (path: string) => {
@@ -104,6 +110,7 @@ export const register = <Response, Validation, Params>(
 	_routes.push({
 		...config,
 		path,
+		rawPath: config.path,
 		handlesErrors: config.handlesErrors ?? false,
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	} as any);

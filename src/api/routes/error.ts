@@ -6,7 +6,7 @@ import { joiValidation } from "../joiValidation";
 import { rateLimiter } from "../rateLimiter";
 import { Route } from "../router";
 
-export const error: Route<"", { stack: string }> = {
+export const error: Route<"", { body: { stack: string } }> = {
 	method: "POST",
 	path: "/error",
 	validate: joiValidation(
@@ -17,13 +17,13 @@ export const error: Route<"", { stack: string }> = {
 	handler: async (context) => {
 		console.log("handler");
 		const {
-			validation: { stack },
+			validation: {
+				body: { stack },
+			},
 		} = context;
 		if (!rateLimiter.test()) return rateLimit(context);
 
-		const { request, response, ...rest } = context;
-		console.log(rest);
-		// logError({ stack }).catch(console.error);
+		logError({ stack }).catch(console.error);
 
 		return "";
 	},

@@ -1,4 +1,3 @@
-import Hapi from "@hapi/hapi";
 import Joi from "joi";
 
 import {
@@ -13,122 +12,114 @@ import {
 	logUserLogin,
 	registerUser,
 } from "../../../mysql.js";
-import RateLimiter from "../../../RateLimiter.js";
-import { HapiPayload } from "../../../types.js";
+import { joiValidation } from "../../joiValidation";
+import { rateLimiter } from "../../rateLimiter.js";
+import { Route } from "../../router.js";
 import { hash, verify } from "./passwords.js";
 import { injectToken } from "./tokens.js";
 
-export default (hapi: Hapi.Server, rateLimiter: RateLimiter): void => {
-	hapi.route({
-		method: "POST",
-		path: "/auth/anon",
-		options: {
-			validate: {
-				payload: Joi.object({
-					username: Joi.string().allow("").required(),
-					room: Joi.string(),
-				}),
-			},
-			handler: async (
-				request: HapiPayload<{ username: string; room?: string }>,
-				h,
-			) => {
-				if (!rateLimiter.test(1.5)) return rateLimit(h);
-
-				const username = request.payload.username;
-				const room = request.payload.room || "katma";
-
-				if (username === "")
-					return injectToken({ username: "tim", room });
-
-				const exists = await fetchUser({ username }).catch(
-					console.error,
-				);
-
-				if (!exists)
-					return injectToken({ username: username + "*", room });
-
-				return usernameTaken(h);
-			},
+export const authAnonRoute: Route<
+	{ username: string; room: string; token: string },
+	{ body: { username: string; room: string } }
+> = {
+	method: "POST",
+	path: "/auth/anon",
+	validate: joiValidation(
+		Joi.object({
+			body: Joi.object({
+				username: Joi.string().allow("").required(),
+				room: Joi.string(),
+			}).required(),
+		}),
+	),
+	handler: async ({
+		response,
+		validation: {
+			body: { username, room = "katma" },
 		},
-	});
+	}) => {
+		if (!rateLimiter.test(1.5)) return rateLimit({ response });
 
-	hapi.route({
-		method: "POST",
-		path: "/auth/login",
-		options: {
-			validate: {
-				payload: Joi.object({
-					username: Joi.string().required(),
-					password: Joi.string().required(),
-					room: Joi.string(),
-				}),
-			},
-			handler: async (
-				request: HapiPayload<{
-					username: string;
-					password: string;
-					room?: string;
-				}>,
-				h,
-			) => {
-				if (!rateLimiter.test(3)) return rateLimit(h);
+		if (username === "") return injectToken({ username: "tim", room });
 
-				const { username, password } = request.payload;
-				const room = request.payload.room ?? "katma";
+		const exists = await fetchUser({ username }).catch(console.error);
 
-				const row = await fetchUserPassword({ username }).catch(
-					console.error,
-				);
+		if (!exists) return injectToken({ username: username + "*", room });
 
-				if (!row) return unknownUsername(h);
+		return usernameTaken({ response });
+	},
+};
 
-				const match = await verify(
-					row.password.toString("utf-8"),
-					password,
-				);
-
-				if (!match) return incorrectPassword(h);
-
-				logUserLogin({ username });
-
-				return injectToken({ username, room });
-			},
+export const authLoginRoute: Route<
+	{ username: string; room: string; token: string },
+	{ body: { username: string; password: string; room: string } }
+> = {
+	method: "POST",
+	path: "/auth/login",
+	validate: joiValidation(
+		Joi.object({
+			body: Joi.object({
+				username: Joi.string().required(),
+				password: Joi.string().required(),
+				room: Joi.string(),
+			}).required(),
+		}),
+	),
+	handler: async ({
+		response,
+		validation: {
+			body: { username, password, room = "katma" },
 		},
-	});
+	}) => {
+		if (!rateLimiter.test(3)) return rateLimit({ response });
 
-	hapi.route({
-		method: "POST",
-		path: "/auth/register",
-		options: {
-			validate: {
-				payload: Joi.object({
-					username: Joi.string().required(),
-					password: Joi.string().required(),
-				}),
-			},
-			handler: async (
-				request: HapiPayload<{ username: string; password: string }>,
-				h,
-			) => {
-				if (!rateLimiter.test(3)) return rateLimit(h);
+		const row = await fetchUserPassword({ username }).catch(console.error);
 
-				const { username, password } = request.payload;
+		if (!row) return unknownUsername({ response });
 
-				if (username.toLowerCase() === "tim") return usernameTaken(h);
+		const match = await verify(row.password.toString("utf-8"), password);
 
-				const exists = await fetchUser({ username }).catch(
-					console.error,
-				);
+		if (!match) return incorrectPassword({ response });
 
-				if (exists) return usernameTaken(h);
+		logUserLogin({ username });
 
-				const hashedPassword = await hash(password);
+		return injectToken({ username, room });
+	},
+};
 
-				await registerUser({ username, password: hashedPassword });
-
-				return injectToken({ username, room: "katma" });
-			},
+export const authRegisterRoute: Route<
+	{ username: string; room: string; token: string },
+	{ body: { username: string; password: string } }
+> = {
+	method: "POST",
+	path: "/auth/register",
+	validate: joiValidation(
+		Joi.object({
+			body: Joi.object({
+				username: Joi.string().required(),
+				password: Joi.string().required(),
+			}).required(),
+		}),
+	),
+	handler: async ({
+		response,
+		validation: {
+			body: { username, password },
 		},
-	});
+	}) => {
+		if (!rateLimiter.test(3)) return rateLimit({ response });
+
+		if (username.toLowerCase() === "tim")
+			return usernameTaken({ response });
+
+		const exists = await fetchUser({ username }).catch(console.error);
+
+		if (exists) return usernameTaken({ response });
+
+		const hashedPassword = await hash(password);
+
+		await registerUser({ username, password: hashedPassword });
+
+		return injectToken({ username, room: "katma" });
+	},
 };

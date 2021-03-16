@@ -80,8 +80,12 @@ export const runner = async (
 		response.write(JSON.stringify(context.result));
 
 		// Strings if we did the stringifying internally
-	} else if (typeof context.result === "string")
+	} else if (typeof context.result === "string") {
+		if (!response.hasHeader("content-type"))
+			response.setHeader("content-type", "text/plain; charset=UTF-8");
 		response.write(context.result);
+	}
+
 	// Do not return unknown errors
 	else if (context.error) {
 		console.error(context.error);
