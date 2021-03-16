@@ -1,17 +1,7 @@
 {
+	"extends": "./tsconfig.json",
 	"compilerOptions": {
 		"outDir": "dist",
-		"baseUrl": "src",
-		"allowJs": true,
-		"target": "ESNext",
-		"lib": [ "ES2019", "ES2020", "DOM" ],
-		"moduleResolution": "node",
-		"module": "ESNext",
-		"strict": true,	
-		"noImplicitAny": true,
-		"noImplicitThis": true,
-		"alwaysStrict": true,
-		"strictNullChecks": true,
 		"paths": { "*": [
 			"../node_modules/*/src/index",
 			"../node_modules/*/lib/index",
@@ -19,7 +9,8 @@
 			"../node_modules/*/dist/index"
 		] },
 		"esModuleInterop": true,
-		"types": []
+		"types": [],
+		"noEmit": false
 	},
 	"include": ["src"],
 	"exclude": [

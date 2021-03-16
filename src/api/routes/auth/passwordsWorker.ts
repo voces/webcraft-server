@@ -31,6 +31,7 @@ parentPort.on(
 		id: number;
 		args: Parameters<typeof funcs[Func]>;
 	}) => {
+		console.log("password job!");
 		// TODO: develop a better typing
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const result = await funcs[func](...(args as [any, any]));

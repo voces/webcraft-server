@@ -1,8 +1,5 @@
 import Path from "path";
-import { fileURLToPath } from "url";
 import { Worker } from "worker_threads";
-
-const __dirname = Path.dirname(fileURLToPath(import.meta.url));
 
 const worker = new Worker(Path.join(__dirname, "passwordsWorker.js"));
 
@@ -11,13 +8,14 @@ const jobs: ((data: any) => void)[] = [];
 let jobId = 0;
 
 worker.on("message", ({ id, result }) => {
+	console.log("done!");
 	jobs[id](result);
 	delete jobs[id];
 });
 
 export const hash = (password: string): Promise<string> => {
 	const id = jobId++;
-
+	console.log("hash");
 	worker.postMessage({
 		func: "hash",
 		id,
@@ -32,7 +30,7 @@ export const verify = async (
 	password: string,
 ): Promise<boolean> => {
 	const id = jobId++;
-
+	console.log("verify2");
 	worker.postMessage({
 		func: "verify",
 		id,

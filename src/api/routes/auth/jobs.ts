@@ -1,4 +1,4 @@
-import { deletedInactiveAccounts } from "../mysql.js";
+import { deletedInactiveAccounts } from "../../../mysql.js";
 
 deletedInactiveAccounts();
 

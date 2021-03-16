@@ -10,7 +10,7 @@ const config =
 		: {
 				name: "local",
 				port: 8080,
-				cors: ["http://localhost:8081"],
+				cors: ["http://localhost:8081", "http://localhost:8082"],
 		  };
 
 export default config;
