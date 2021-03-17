@@ -19,6 +19,9 @@ jobs:
         node-version: '14.x'
     - name: Install dependencies
       run: npm install
+    - name: Install mvp-bd-client dependencies
+      run: npm install
+      working-directory: mvp-bd-client
     - name: Run typcheck
       run: npm run typecheck
     - name: Run linter
