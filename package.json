@@ -40,6 +40,7 @@
     "lint": "eslint 'src/**/*.ts' --quiet --fix",
     "postinstall": "node scripts/postinstall.js",
     "start": "node --enable-source-maps dist/index.js",
+    "test-lint": "eslint src --ext .js,.ts,.jsx,.tsx --max-warnings 0",
     "test": "vt **/*.test.js --no-parallel",
     "typecheck": "tsc --noEmit"
   },
