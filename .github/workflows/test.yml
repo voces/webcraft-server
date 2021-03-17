@@ -22,6 +22,9 @@ jobs:
     - name: Install mvp-bd-client dependencies
       run: npm install
       working-directory: mvp-bd-client
+    - name: Build mvp-bd-client
+      run: npm run build
+      working-directory: mvp-bd-client
     - name: Run typcheck
       run: npm run typecheck
     - name: Run linter
