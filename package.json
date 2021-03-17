@@ -34,14 +34,15 @@
     "typescript": "^4.1.3"
   },
   "scripts": {
-    "build-old": "tsc --project tsconfig.build.json",
     "build-passwords-worker": "esbuild src/auth/passwordsWorker.ts --bundle --sourcemap --platform=node --outfile=dist/passwordsWorker.js",
     "build": "esbuild src/index.ts --bundle --sourcemap --platform=node --outfile=dist/index.js",
-    "postinstall": "node scripts/postinstall.js",
     "dev": "node scripts/dev.js",
     "lint": "eslint 'src/**/*.ts' --quiet --fix",
+    "postinstall": "node scripts/postinstall.js",
     "start": "node --enable-source-maps dist/index.js",
-    "test": "vt **/*.test.js --no-parallel"
+    "test-lint": "eslint src --ext .js,.ts,.jsx,.tsx --max-warnings 0",
+    "test": "vt **/*.test.js --no-parallel",
+    "typecheck": "tsc --noEmit"
   },
   "license": "ISC",
   "dependencies": {
