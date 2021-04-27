@@ -3,6 +3,17 @@
   "version": "1.0.0",
   "description": "Minimum viable product of Bulldog server",
   "main": "src/index.ts",
+  "scripts": {
+    "build-passwords-worker": "esbuild src/api/routes/auth/passwordsWorker.ts --bundle --sourcemap --platform=node --outfile=dist/passwordsWorker.js",
+    "build": "esbuild src/index.ts --bundle --sourcemap --platform=node --outfile=dist/index.js",
+    "dev": "node scripts/dev.js",
+    "lint": "eslint 'src/**/*.ts' --quiet --fix",
+    "postinstall": "node scripts/postinstall.js",
+    "start": "node --enable-source-maps dist/index.js",
+    "test-lint": "eslint src --ext .js,.ts,.jsx,.tsx --max-warnings 0",
+    "test": "vt **/*.test.js --no-parallel",
+    "typecheck": "tsc --noEmit"
+  },
   "devDependencies": {
     "@babel/preset-env": "^7.12.11",
     "@types/hapi__hapi": "^20.0.3",
@@ -32,17 +43,6 @@
     "ts-node": "^9.1.1",
     "tsc-watch": "^4.2.9",
     "typescript": "^4.1.3"
-  },
-  "scripts": {
-    "build-passwords-worker": "esbuild src/auth/passwordsWorker.ts --bundle --sourcemap --platform=node --outfile=dist/passwordsWorker.js",
-    "build": "esbuild src/index.ts --bundle --sourcemap --platform=node --outfile=dist/index.js",
-    "dev": "node scripts/dev.js",
-    "lint": "eslint 'src/**/*.ts' --quiet --fix",
-    "postinstall": "node scripts/postinstall.js",
-    "start": "node --enable-source-maps dist/index.js",
-    "test-lint": "eslint src --ext .js,.ts,.jsx,.tsx --max-warnings 0",
-    "test": "vt **/*.test.js --no-parallel",
-    "typecheck": "tsc --noEmit"
   },
   "license": "ISC",
   "dependencies": {
