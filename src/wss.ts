@@ -53,7 +53,7 @@ wss.on("connection", async (ws: WebSocketConnection, req) => {
 			}),
 		);
 	} catch (err) {
-		/* do nothing */
+		console.error(new Date(), err);
 	}
 
 	room.addConnection(ws);

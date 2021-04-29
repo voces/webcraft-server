@@ -12,7 +12,10 @@ export interface Room {
 	removeConnection: (connection: WebSocketConnection) => void;
 }
 
-export const initializeGame = <T extends Game>(game: T): Room => {
+export const initializeGame = <T extends Game>(
+	game: T,
+	withGame: <A>(game: T, fn: (game: T) => A) => A,
+): Room => {
 	game.synchronizationState = "synchronized";
 
 	const connections: WebSocketConnection[] = [];
@@ -76,7 +79,7 @@ export const initializeGame = <T extends Game>(game: T): Room => {
 	return {
 		connections,
 		send,
-		state: { toJSON: () => game.toJSON() },
+		state: { toJSON: () => withGame(game, () => game.toJSON()) },
 		stop,
 		addConnection: (ws) => connections.push(ws),
 		removeConnection: (ws) => {
