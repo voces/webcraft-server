@@ -25,7 +25,6 @@ export const jsonBody: Route = {
 				request.json = JSON.parse(data);
 				pResolve(undefined);
 			} catch (err) {
-				console.log("error");
 				pReject(jsonError({ response }));
 			}
 		});

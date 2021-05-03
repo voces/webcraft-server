@@ -2,8 +2,12 @@ import { Missing404Error } from "../../errors";
 import { Route } from "../router";
 
 export const missing: Route = {
-	handler: async ({ request, result }) => {
-		if (result === undefined && request.method !== "OPTIONS")
+	handler: async ({ request, result, response }) => {
+		if (
+			result === undefined &&
+			request.method !== "OPTIONS" &&
+			response.statusCode === 200
+		)
 			throw new Missing404Error();
 		return result;
 	},

@@ -80,12 +80,18 @@ export class ValidationError extends Error {
 	code = 7;
 	message!: string;
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	toJSON(): any {
+	toJSON(): unknown {
 		return {
 			statusCode: this.statusCode,
 			code: this.code,
 			message: this.message,
 		};
 	}
+}
+
+export class UncaughtError extends Error {
+	apiError = true;
+	statusCode = 500;
+	message = "An uncaught server error was thrown";
+	code = 8;
 }

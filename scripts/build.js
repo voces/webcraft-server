@@ -1,5 +1,7 @@
 const { spawn } = require("child_process");
 
+const watching = process.argv.includes("--watch");
+
 let childProcess;
 let killing = false;
 const spawnProcess = () => {
@@ -16,6 +18,7 @@ const spawnProcess = () => {
 };
 
 const onBuild = () => {
+	if (!watching) return;
 	if (childProcess) {
 		console.log("new build, restarting...");
 		killing = true;
@@ -30,7 +33,17 @@ require("esbuild")
 		bundle: true,
 		sourcemap: true,
 		platform: "node",
-		watch: {
+		external: [
+			"chalk",
+			"joi",
+			"jsonwebtoken",
+			"mime-types",
+			"mysql2",
+			"node-fetch",
+			"tar",
+			"ws",
+		],
+		watch: watching && {
 			onRebuild(error, result) {
 				if (error) {
 					console.error(error);

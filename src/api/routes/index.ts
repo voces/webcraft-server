@@ -6,6 +6,7 @@ import {
 } from "./auth/routes";
 import { certs } from "./certs";
 import { error } from "./error";
+import { registerMapsRoutes } from "./maps";
 
 export const registerApiRoutes = (): void => {
 	register(error);
@@ -13,4 +14,5 @@ export const registerApiRoutes = (): void => {
 	register(authAnonRoute);
 	register(authLoginRoute);
 	register(authRegisterRoute);
+	registerMapsRoutes();
 };

@@ -2,10 +2,8 @@ import { Server } from "http";
 import WebSocket from "ws";
 
 import { verifyToken } from "./api/routes/auth/tokens.js";
-import { createKatma } from "./games/katma.js";
-import { createMazingContest } from "./games/mazingcontest.js";
 import RateLimiter from "./RateLimiter.js";
-import { Room } from "./rooms.js";
+import { loadGame, Room } from "./rooms.js";
 import { WebSocketConnection } from "./types.js";
 
 const MAX_MESSAGE_LENGTH = 2500;
@@ -90,6 +88,6 @@ export default (server: Server): void => {
 		),
 	);
 
-	rooms.katma = createKatma();
-	rooms.mazingcontest = createMazingContest();
+	loadGame("katma").then((room) => (rooms.katma = room));
+	loadGame("mazingcontest").then((room) => (rooms.mazingcontest = room));
 };

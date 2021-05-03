@@ -1,5 +1,6 @@
 import { IncomingMessage, ServerResponse } from "http";
 
+import { UncaughtError } from "../errors";
 import { EmptyObject, InternalRoute, routes, ValidateContext } from "./router";
 
 export const runner = async (
@@ -61,14 +62,17 @@ export const runner = async (
 				validation,
 			});
 		} catch (err) {
-			context.error = err;
-			if ("statusCode" in err) response.statusCode = err.statusCode;
+			let error = err;
+			// Only expose user-thrown errors
+			if (!err.apiError) error = new UncaughtError();
+			context.error = error;
+			if ("statusCode" in error) response.statusCode = error.statusCode;
 		}
 	}
 
 	// apiErrors can be treated as safe responses
 	const error = context.error;
-	if (error && typeof error === "object" && "apiError" in error) {
+	if (error && typeof error === "object") {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		delete (error as any).apiError;
 		context.result = error;
@@ -84,12 +88,6 @@ export const runner = async (
 		if (!response.hasHeader("content-type"))
 			response.setHeader("content-type", "text/plain; charset=UTF-8");
 		response.write(context.result);
-	}
-
-	// Do not return unknown errors
-	else if (context.error) {
-		console.error(context.error);
-		response.statusCode = 500;
 	} else response.write("");
 
 	response.end();

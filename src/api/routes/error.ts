@@ -15,7 +15,6 @@ export const error: Route<"", { body: { stack: string } }> = {
 		}),
 	),
 	handler: async (context) => {
-		console.log("handler");
 		const {
 			validation: {
 				body: { stack },

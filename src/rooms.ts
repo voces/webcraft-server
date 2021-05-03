@@ -1,4 +1,7 @@
-import type { Game } from "../mvp-bd-client/src/engine/Game";
+import { mkdir, readFile } from "fs/promises";
+import fetch from "node-fetch";
+import tar from "tar";
+
 import { WebSocketConnection } from "./types.js";
 
 export const LATENCY = 50;
@@ -12,10 +15,113 @@ export interface Room {
 	removeConnection: (connection: WebSocketConnection) => void;
 }
 
-export const initializeGame = <T extends Game>(
-	game: T,
-	withGame: <A>(game: T, fn: (game: T) => A) => A,
-): Room => {
+type Network = {
+	new (): Record<string, unknown>;
+};
+
+type Game = {
+	new (network: InstanceType<Network>): {
+		synchronizationState: "synchronizing" | "synchronized";
+		__UNSAFE_network: {
+			dispatchEvent: (
+				type: string,
+				data: Record<string, unknown>,
+			) => void;
+			send: (data: Record<string, unknown>, time?: number) => void;
+		};
+		toJSON: () => Record<string, unknown>;
+	};
+};
+
+type Map = {
+	Game: Game;
+	Network: Network;
+	withGame: <T>(game: InstanceType<Game>, fn: () => T) => T;
+};
+
+const extractTarball = (
+	stream: NodeJS.ReadableStream,
+	protocol: string,
+): Promise<Record<string, string | null>> => {
+	const data: Record<string, string | null> = {};
+	return new Promise((resolve, reject) => {
+		mkdir(`maps/${protocol}`, { recursive: true }).then(() => {
+			const parser = tar.extract({
+				strict: true,
+				strip: 1,
+				cwd: `maps/${protocol}`,
+			});
+			stream.pipe(parser);
+			parser.on("close", () => resolve(data));
+			parser.on("error", reject);
+		});
+	});
+};
+
+const importMap = async (protocol: string): Promise<Map> => {
+	// Fetch current version, if it exists
+	let currentVersion;
+	let mapPackage;
+	try {
+		mapPackage = JSON.parse(
+			await readFile(`maps/${protocol}/package.json`, "utf-8"),
+		);
+		currentVersion = mapPackage.version;
+	} catch {
+		/* do nothing */
+	}
+
+	// Fetch latest version/tarball url
+	console.log(new Date(), `fetching ${protocol} url`);
+	const data = await fetch(
+		`http://registry.npmjs.org/${protocol}/latest`,
+	).then((r) => r.json());
+	const latestVersion = data.version;
+
+	if (latestVersion && currentVersion !== latestVersion) {
+		// Fetch the latest version if it is different than the current one
+		console.log(
+			new Date(),
+			`fetching ${protocol}@${latestVersion} tarball at ${data.dist.tarball}`,
+		);
+		const res = await fetch(data.dist.tarball);
+		console.log(new Date(), `extracting ${protocol}`);
+		await extractTarball(res.body, protocol);
+		console.log(new Date(), `loading ${protocol}`);
+		mapPackage = JSON.parse(
+			await readFile(`maps/${protocol}/package.json`, "utf-8"),
+		);
+	} else if (currentVersion)
+		// Use the local copy
+		console.log(new Date(), `using existing ${protocol}@${currentVersion}`);
+	// No local or remote copy
+	else throw new Error(`Could not import ${protocol}`);
+
+	// Load the map
+	let map;
+	// This makes esbuild happy
+	// eslint-disable-next-line no-useless-catch
+	try {
+		map = await import(`../maps/${protocol}/${mapPackage.main}`);
+	} catch (err) {
+		throw err;
+	}
+
+	// Validate correct format
+	if (typeof map.Game !== "function")
+		throw new Error(`Expected ${protocol} to export a Game class`);
+	if (typeof map.Network !== "function")
+		throw new Error(`Expected ${protocol} to export a Network class`);
+	if (typeof map.withGame !== "function")
+		throw new Error(`Expected ${protocol} to export a withGame function`);
+
+	return map;
+};
+
+export const loadGame = async (protocol: string): Promise<Room> => {
+	const { Game, Network, withGame } = await importMap(protocol);
+	const game = new Game(new Network());
+
 	game.synchronizationState = "synchronized";
 
 	const connections: WebSocketConnection[] = [];
