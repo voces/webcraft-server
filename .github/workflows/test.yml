@@ -1,33 +1,27 @@
 name: test
 on:
-  push:
-    paths:
-      - '**.ts'
-      - 'package.json'
-      - '.github/workflows/test.yml'
-  workflow_dispatch:
+    push:
+        paths:
+            - "**.ts"
+            - "package.json"
+            - ".github/workflows/test.yml"
+    workflow_dispatch:
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
-    - name: Use Node.js
-      uses: actions/setup-node@v1
-      with:
-        node-version: '14.x'
-    - name: Install dependencies
-      run: npm install
-    - name: Install mvp-bd-client dependencies
-      run: npm install
-      working-directory: mvp-bd-client
-    - name: Build mvp-bd-client
-      run: npm run build
-      working-directory: mvp-bd-client
-    - name: Run typecheck
-      run: npm run typecheck
-    - name: Run linter
-      run: npm run test-lint
-    - name: Run build
-      run: npm run build
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  submodules: true
+            - name: Use Node.js
+              uses: actions/setup-node@v1
+              with:
+                  node-version: "16.x"
+            - name: Install dependencies
+              run: npm install
+            - name: Run typecheck
+              run: npm run typecheck
+            - name: Run linter
+              run: npm run test-lint
+            - name: Run build
+              run: npm run build
