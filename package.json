@@ -58,6 +58,6 @@
     "libsodium-wrappers": "^0.7.8",
     "mime-types": "^2.1.27",
     "mysql2": "^2.2.5",
-    "ws": "^7.4.2"
+    "ws": "^7.4.6"
   }
 }
