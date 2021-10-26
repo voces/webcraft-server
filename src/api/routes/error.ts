@@ -4,7 +4,7 @@ import { rateLimit } from "../../errors";
 import { logError } from "../../mysql";
 import { joiValidation } from "../joiValidation";
 import { rateLimiter } from "../rateLimiter";
-import { Route } from "../router";
+import type { Route } from "../router";
 
 export const error: Route<"", { body: { stack: string } }> = {
 	method: "POST",

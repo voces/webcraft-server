@@ -1,14 +1,15 @@
-import { Server } from "http";
-import WebSocket from "ws";
+import type { Server } from "http";
+import { WebSocketServer } from "ws";
 
 import { verifyToken } from "./api/routes/auth/tokens.js";
 import RateLimiter from "./RateLimiter.js";
-import { loadGame, Room } from "./rooms.js";
-import { WebSocketConnection } from "./types.js";
+import type { Room } from "./rooms.js";
+import { loadGame } from "./rooms.js";
+import type { WebSocketConnection } from "./types.js";
 
 const MAX_MESSAGE_LENGTH = 2500;
 
-const wss = new WebSocket.Server({ noServer: true });
+const wss = new WebSocketServer({ noServer: true });
 
 const rooms: Record<string, Room> = {};
 
@@ -88,6 +89,10 @@ export default (server: Server): void => {
 		),
 	);
 
-	loadGame("katma").then((room) => (rooms.katma = room));
-	loadGame("mazingcontest").then((room) => (rooms.mazingcontest = room));
+	loadGame("katma")
+		.then((room) => (rooms.katma = room))
+		.catch(console.error);
+	loadGame("mazingcontest")
+		.then((room) => (rooms.mazingcontest = room))
+		.catch(console.error);
 };

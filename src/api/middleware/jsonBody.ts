@@ -1,5 +1,5 @@
 import { jsonError, MissingBodyError } from "../../errors";
-import { Route } from "../router";
+import type { Route } from "../router";
 
 const methods: (string | undefined)[] = ["POST"];
 

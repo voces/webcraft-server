@@ -1,4 +1,5 @@
-import MySQL, { OkPacket, RowDataPacket } from "mysql2/promise";
+import type { OkPacket, RowDataPacket } from "mysql2/promise";
+import MySQL from "mysql2/promise";
 
 export const raw = MySQL.createPool({
 	host: "localhost",
@@ -29,13 +30,15 @@ const queryOne = (
 		return result[0];
 	});
 
-const typedQueryOne = <Values extends Record<string, string | number>, Return>(
-	query: string,
-) => (values: Values): Promise<Return> =>
-	queryOne(query, values) as Promise<Return>;
+const typedQueryOne =
+	<Values extends Record<string, string | number>, Return>(query: string) =>
+	(values: Values): Promise<Return> =>
+		queryOne(query, values) as Promise<Return>;
 
-const emptyTypedQueryOne = <Return>(query: string) => (): Promise<Return> =>
-	queryOne(query) as Promise<Return>;
+const emptyTypedQueryOne =
+	<Return>(query: string) =>
+	(): Promise<Return> =>
+		queryOne(query) as Promise<Return>;
 
 // users
 

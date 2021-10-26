@@ -14,7 +14,7 @@ import {
 } from "../../../mysql.js";
 import { joiValidation } from "../../joiValidation";
 import { rateLimiter } from "../../rateLimiter.js";
-import { Route } from "../../router.js";
+import type { Route } from "../../router.js";
 import { hash, verify } from "./passwords.js";
 import { injectToken } from "./tokens.js";
 

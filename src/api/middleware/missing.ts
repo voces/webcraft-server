@@ -1,5 +1,5 @@
 import { Missing404Error } from "../../errors";
-import { Route } from "../router";
+import type { Route } from "../router";
 
 export const missing: Route = {
 	handler: async ({ request, result, response }) => {

@@ -1,4 +1,5 @@
-const { spawn } = require("child_process");
+import { spawn } from "child_process";
+import esbuild from "esbuild";
 
 const watching = process.argv.includes("--watch");
 
@@ -26,13 +27,14 @@ const onBuild = () => {
 	} else spawnProcess();
 };
 
-require("esbuild")
+esbuild
 	.build({
 		entryPoints: ["src/index.ts"],
 		outfile: "dist/index.js",
 		bundle: true,
 		sourcemap: true,
 		platform: "node",
+		format: "esm",
 		external: [
 			"chalk",
 			"joi",

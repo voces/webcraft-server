@@ -1,6 +1,6 @@
-import { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage, ServerResponse } from "http";
 
-import { ApiError } from "../errors";
+import type { ApiError } from "../errors";
 
 const emptyObject = Object.freeze({});
 export type EmptyObject = typeof emptyObject;
@@ -20,7 +20,7 @@ export interface ValidateContext<Params extends Record<string, unknown>> {
  */
 export interface HandlerContext<
 	Params extends EmptyObject = EmptyObject,
-	Validation = unknown
+	Validation = unknown,
 > extends ValidateContext<Params> {
 	validation: Validation;
 }
@@ -34,7 +34,7 @@ type Handler<Params extends EmptyObject, Validation, Response> = (
 
 type ValidationProps<
 	Validation,
-	Params extends EmptyObject
+	Params extends EmptyObject,
 > = Validation extends void
 	? EmptyObject
 	: {
@@ -55,7 +55,7 @@ interface RouteBase<Response, Validation, Params extends EmptyObject> {
 export type InternalRoute<
 	Response,
 	Validation = void,
-	Params extends EmptyObject = EmptyObject
+	Params extends EmptyObject = EmptyObject,
 > = RouteBase<Response, Validation, Params> & {
 	path?: (path: string) => Params | undefined;
 	rawPath?: string;
@@ -68,7 +68,7 @@ export type InternalRoute<
 export type Route<
 	Response = unknown,
 	Validation = void,
-	Params extends EmptyObject = EmptyObject
+	Params extends EmptyObject = EmptyObject,
 > = RouteBase<Response, Validation, Params> & {
 	path?: string;
 	handlesErrors?: boolean;

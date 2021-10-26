@@ -1,4 +1,12 @@
-import { HandlerContext } from "./api/router";
+import type { HandlerContext } from "./api/router";
+import {
+	hasBoolean,
+	hasMaybeNumber,
+	hasMaybeString,
+	hasNumber,
+	hasString,
+	isRecord,
+} from "./typeguards";
 
 export interface ApiError {
 	apiError: true;
@@ -95,3 +103,13 @@ export class UncaughtError extends Error {
 	message = "An uncaught server error was thrown";
 	code = 8;
 }
+
+export const isError = (value: unknown): value is { message: string } =>
+	isRecord(value) && hasString(value, "message");
+
+export const isApiError = (value: unknown): value is ApiError =>
+	isRecord(value) &&
+	hasBoolean(value, "apiError") &&
+	hasNumber(value, "code") &&
+	hasMaybeString(value, "field") &&
+	hasMaybeNumber(value, "statusCode");

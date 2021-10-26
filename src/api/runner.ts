@@ -1,7 +1,8 @@
-import { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage, ServerResponse } from "http";
 
-import { UncaughtError } from "../errors";
-import { EmptyObject, InternalRoute, routes, ValidateContext } from "./router";
+import { isApiError, UncaughtError } from "../errors";
+import type { EmptyObject, InternalRoute, ValidateContext } from "./router";
+import { routes } from "./router";
 
 export const runner = async (
 	request: IncomingMessage,
@@ -62,11 +63,10 @@ export const runner = async (
 				validation,
 			});
 		} catch (err) {
-			let error = err;
+			const error = isApiError(err) ? err : new UncaughtError();
 			// Only expose user-thrown errors
-			if (!err.apiError) error = new UncaughtError();
 			context.error = error;
-			if ("statusCode" in error) response.statusCode = error.statusCode;
+			if (error.statusCode) response.statusCode = error.statusCode;
 		}
 	}
 

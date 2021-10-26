@@ -1,7 +1,8 @@
 import { readFile } from "fs/promises";
 import mime from "mime-types";
 
-import { register, Route } from "../router";
+import type { Route } from "../router";
+import { register } from "../router";
 
 const maps: Route<string | undefined, void, { map: string; file: string }> = {
 	method: "GET",

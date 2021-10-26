@@ -1,4 +1,4 @@
-import http from "http";
+import { createServer } from "http";
 
 import api from "./api.js";
 import config from "./config.js";
@@ -6,7 +6,7 @@ import wss from "./wss.js";
 
 console.log(new Date(), "using config", config.name);
 
-const server = http.createServer();
+const server = createServer();
 server.listen(config.port);
 
 wss(server);

@@ -1,5 +1,5 @@
 import config from "../../config";
-import { Route } from "../router";
+import type { Route } from "../router";
 
 export const cors: Route<void> = {
 	handler: async ({ request, response }) => {

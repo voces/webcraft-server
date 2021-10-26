@@ -1,7 +1,7 @@
-import Path from "path";
+import { URL } from "url";
 import { Worker } from "worker_threads";
 
-const worker = new Worker(Path.join(__dirname, "passwordsWorker.js"));
+const worker = new Worker(new URL("passwordsWorker.js", import.meta.url));
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const jobs: ((data: any) => void)[] = [];

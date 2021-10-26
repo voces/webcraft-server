@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
 import mime from "mime-types";
 
-import { Route } from "../router";
+import type { Route } from "../router";
 
 export const certs: Route<string | undefined, void, { file: string }> = {
 	method: "GET",

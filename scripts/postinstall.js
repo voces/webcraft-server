@@ -1,4 +1,4 @@
-const { readFile, writeFile } = require("fs/promises");
+import { readFile, writeFile } from "fs/promises";
 
 (async () => {
 	// This package isn't compatible with esbuild

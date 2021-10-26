@@ -2,7 +2,8 @@ import { mkdir, readFile } from "fs/promises";
 import fetch from "node-fetch";
 import tar from "tar";
 
-import { WebSocketConnection } from "./types.js";
+import { hasRecord, hasString, isRecord } from "./typeguards.js";
+import type { WebSocketConnection } from "./types.js";
 
 export const LATENCY = 50;
 
@@ -58,51 +59,81 @@ const extractTarball = (
 	});
 };
 
-const importMap = async (protocol: string): Promise<Map> => {
-	// Fetch current version, if it exists
-	let currentVersion;
-	let mapPackage;
-	try {
-		mapPackage = JSON.parse(
-			await readFile(`maps/${protocol}/package.json`, "utf-8"),
-		);
-		currentVersion = mapPackage.version;
-	} catch {
-		/* do nothing */
-	}
+type Package = { version: string; dist: { tarball: string }; main: string };
 
+const isPackage = (value: unknown): value is Package =>
+	isRecord(value) &&
+	hasString(value, "version") &&
+	hasRecord(value, "dist") &&
+	hasString(value.dist, "tarball") &&
+	hasString(value, "main");
+
+const fetchLatest = async (protocol: string): Promise<Package | undefined> => {
 	// Fetch latest version/tarball url
 	console.log(new Date(), `fetching ${protocol} url`);
 	const data = await fetch(
 		`http://registry.npmjs.org/${protocol}/latest`,
 	).then((r) => r.json());
-	const latestVersion = data.version;
 
-	if (latestVersion && currentVersion !== latestVersion) {
-		// Fetch the latest version if it is different than the current one
-		console.log(
-			new Date(),
-			`fetching ${protocol}@${latestVersion} tarball at ${data.dist.tarball}`,
+	if (!isPackage(data)) {
+		console.error(new Error(`Invalid package.json for ${protocol}@latest`));
+		return;
+	}
+
+	// Fetch the latest version if it is different than the current one
+	console.log(
+		new Date(),
+		`fetching ${protocol}@${data.version} tarball at ${data.dist.tarball}`,
+	);
+
+	const res = await fetch(data.dist.tarball);
+	if (!res.body) {
+		console.error(
+			new Error(`No body when fetching ${protocol}@${data.version}`),
 		);
-		const res = await fetch(data.dist.tarball);
-		console.log(new Date(), `extracting ${protocol}`);
-		await extractTarball(res.body, protocol);
-		console.log(new Date(), `loading ${protocol}`);
+		return;
+	}
+
+	console.log(new Date(), `extracting ${protocol}`);
+	await extractTarball(res.body, protocol);
+
+	console.log(new Date(), `loading ${protocol}`);
+	try {
+		return JSON.parse(
+			await readFile(`maps/${protocol}/package.json`, "utf-8"),
+		);
+	} catch (err) {
+		console.error(err);
+	}
+};
+
+const importMap = async (protocol: string): Promise<Map> => {
+	// Fetch current version, if it exists
+	let currentVersion: string | undefined;
+	let mapPackage: Package | undefined;
+	try {
 		mapPackage = JSON.parse(
 			await readFile(`maps/${protocol}/package.json`, "utf-8"),
 		);
-	} else if (currentVersion)
-		// Use the local copy
+		currentVersion = mapPackage?.version;
+	} catch {
+		/* do nothing */
+	}
+
+	// Fetch latest version/tarball url
+	mapPackage = (await fetchLatest(protocol)) ?? mapPackage;
+	if (!mapPackage) throw new Error(`Could not import ${protocol}`);
+	else if (currentVersion === mapPackage.version)
 		console.log(new Date(), `using existing ${protocol}@${currentVersion}`);
-	// No local or remote copy
-	else throw new Error(`Could not import ${protocol}`);
 
 	// Load the map
 	let map;
 	// This makes esbuild happy
 	// eslint-disable-next-line no-useless-catch
 	try {
-		map = await import(`../maps/${protocol}/${mapPackage.main}`);
+		map = await import(`../maps/${protocol}/${mapPackage.main}`).then(
+			(i) => i.default,
+		);
 	} catch (err) {
 		throw err;
 	}
@@ -159,7 +190,7 @@ export const loadGame = async (protocol: string): Promise<Room> => {
 	) => {
 		if (!json.type) return console.error(new Error("missing message type"));
 
-		json.time = lastTime = Math.max(time || Date.now(), lastTime + 1);
+		json.time = lastTime = Math.max(time ?? Date.now(), lastTime + 1);
 
 		queue.push(json);
 

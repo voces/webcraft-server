@@ -1,6 +1,6 @@
 import chalk from "chalk";
 
-import { Route } from "../router";
+import type { Route } from "../router";
 
 const colorizedStatus = (status: number) => {
 	if (status < 400) return chalk.green(status);

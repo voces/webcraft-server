@@ -19,9 +19,9 @@ export default class RateLimiter {
 		recovery?: number;
 		latency?: number;
 	} = {}) {
-		this.cap = cap || CAP;
-		this.recovery = recovery || RECOVERY;
-		this.latency = latency || LATENCY;
+		this.cap = cap ?? CAP;
+		this.recovery = recovery ?? RECOVERY;
+		this.latency = latency ?? LATENCY;
 		this.remaining = this.cap;
 	}
 

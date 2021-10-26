@@ -1,4 +1,4 @@
-import { Server } from "http";
+import type { Server } from "http";
 
 import { cors } from "./api/middleware/cors";
 import { jsonBody } from "./api/middleware/jsonBody";
