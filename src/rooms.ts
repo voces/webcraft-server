@@ -68,7 +68,10 @@ const isPackage = (value: unknown): value is Package =>
 	hasString(value.dist, "tarball") &&
 	hasString(value, "main");
 
-const fetchLatest = async (protocol: string): Promise<Package | undefined> => {
+const fetchLatest = async (
+	protocol: string,
+	currentVersion: string | undefined,
+): Promise<Package | undefined> => {
 	// Fetch latest version/tarball url
 	console.log(new Date(), `fetching ${protocol} url`);
 	const data = await fetch(
@@ -79,6 +82,8 @@ const fetchLatest = async (protocol: string): Promise<Package | undefined> => {
 		console.error(new Error(`Invalid package.json for ${protocol}@latest`));
 		return;
 	}
+
+	if (data.version === currentVersion) return;
 
 	// Fetch the latest version if it is different than the current one
 	console.log(
@@ -121,7 +126,7 @@ const importMap = async (protocol: string): Promise<Map> => {
 	}
 
 	// Fetch latest version/tarball url
-	mapPackage = (await fetchLatest(protocol)) ?? mapPackage;
+	mapPackage = (await fetchLatest(protocol, currentVersion)) ?? mapPackage;
 	if (!mapPackage) throw new Error(`Could not import ${protocol}`);
 	else if (currentVersion === mapPackage.version)
 		console.log(new Date(), `using existing ${protocol}@${currentVersion}`);

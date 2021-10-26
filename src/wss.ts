@@ -83,8 +83,8 @@ wss.on("connection", async (ws: WebSocketConnection, req) => {
 });
 
 export default (server: Server): void => {
-	server.on("upgrade", (request, socket, head) =>
-		wss.handleUpgrade(request, socket, head, (ws) =>
+	server.on("upgrade", (request, _, head) =>
+		wss.handleUpgrade(request, request.socket, head, (ws) =>
 			wss.emit("connection", ws, request),
 		),
 	);
