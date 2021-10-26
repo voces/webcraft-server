@@ -4,7 +4,7 @@ import { WebSocketServer } from "ws";
 import { verifyToken } from "./api/routes/auth/tokens.js";
 import RateLimiter from "./RateLimiter.js";
 import type { Room } from "./rooms.js";
-import { loadGame } from "./rooms.js";
+import { getGames, loadGame } from "./rooms.js";
 import type { WebSocketConnection } from "./types.js";
 
 const MAX_MESSAGE_LENGTH = 2500;
@@ -89,10 +89,11 @@ export default (server: Server): void => {
 		),
 	);
 
-	loadGame("katma")
-		.then((room) => (rooms.katma = room))
-		.catch(console.error);
-	loadGame("mazingcontest")
-		.then((room) => (rooms.mazingcontest = room))
-		.catch(console.error);
+	getGames().then((games) =>
+		games.forEach((game) =>
+			loadGame(game)
+				.then((room) => (rooms[game] = room))
+				.catch(console.error),
+		),
+	);
 };

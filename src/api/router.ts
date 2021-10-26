@@ -93,7 +93,7 @@ export const register = <Response, Validation, Params>(
 	let path;
 	if (config.path) {
 		const regexp = new RegExp(
-			escapeRegex(config.path).replace(/:\w+/g, "(.*)"),
+			"^" + escapeRegex(config.path).replace(/:\w+/g, "(.+)") + "$",
 		);
 		const params = Array.from(config.path.matchAll(/:\w+/g)).map((v) =>
 			v[0].slice(1),

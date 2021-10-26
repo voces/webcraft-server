@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "http";
+import { URL } from "url";
 
 import { isApiError, UncaughtError } from "../errors";
 import type { EmptyObject, InternalRoute, ValidateContext } from "./router";
@@ -19,7 +20,8 @@ export const runner = async (
 
 			let params: unknown | EmptyObject = {};
 			if (route.path) {
-				params = route.path(request.url);
+				const url = new URL(request.url, "https://localhost");
+				params = route.path(url.pathname.replace(/(.)\/$/, "$1"));
 				if (!params) return false;
 			}
 

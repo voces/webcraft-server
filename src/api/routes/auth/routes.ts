@@ -73,7 +73,7 @@ export const authLoginRoute: Route<
 	}) => {
 		if (!rateLimiter.test(3)) return rateLimit({ response });
 
-		const row = await fetchUserPassword({ username }).catch(console.error);
+		const row = await fetchUserPassword({ username });
 
 		if (!row) return unknownUsername({ response });
 
@@ -112,7 +112,7 @@ export const authRegisterRoute: Route<
 		if (username.toLowerCase() === "tim")
 			return usernameTaken({ response });
 
-		const exists = await fetchUser({ username }).catch(console.error);
+		const exists = await fetchUser({ username });
 
 		if (exists) return usernameTaken({ response });
 

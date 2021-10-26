@@ -18,7 +18,7 @@ const spawnProcess = () => {
 	});
 };
 
-const onBuild = () => {
+const onBuild = (a, b) => {
 	if (!watching) return;
 	if (childProcess) {
 		console.log("new build, restarting...");
@@ -47,6 +47,7 @@ esbuild
 		],
 		watch: watching && {
 			onRebuild(error, result) {
+				console.log(result)
 				if (error) {
 					console.error(error);
 					return;

@@ -5,7 +5,8 @@
 	"main": "src/index.ts",
 	"scripts": {
 		"build-passwords-worker": "esbuild src/api/routes/auth/passwordsWorker.ts --bundle --sourcemap --platform=node --format=esm --external:libsodium-wrappers --outfile=dist/passwordsWorker.js",
-		"build": "node scripts/build.js",
+		"build-main": "node scripts/build.js",
+		"build": "npm run build-main && npm run build-passwords-worker",
 		"dev": "node scripts/build.js --watch",
 		"lint": "eslint 'src/**/*.ts' --quiet --fix",
 		"postinstall": "node scripts/postinstall.js",

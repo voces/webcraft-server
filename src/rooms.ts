@@ -1,4 +1,4 @@
-import { mkdir, readFile } from "fs/promises";
+import { lstat, mkdir, readFile } from "fs/promises";
 import fetch from "node-fetch";
 import tar from "tar";
 
@@ -116,20 +116,31 @@ const importMap = async (protocol: string): Promise<Map> => {
 	// Fetch current version, if it exists
 	let currentVersion: string | undefined;
 	let mapPackage: Package | undefined;
+	let linked = false;
 	try {
 		mapPackage = JSON.parse(
 			await readFile(`maps/${protocol}/package.json`, "utf-8"),
 		);
 		currentVersion = mapPackage?.version;
+		linked = await lstat(`maps/${protocol}`).then((s) =>
+			s.isSymbolicLink(),
+		);
 	} catch {
 		/* do nothing */
 	}
 
 	// Fetch latest version/tarball url
-	mapPackage = (await fetchLatest(protocol, currentVersion)) ?? mapPackage;
+	mapPackage = linked
+		? (await fetchLatest(protocol, currentVersion)) ?? mapPackage
+		: mapPackage;
 	if (!mapPackage) throw new Error(`Could not import ${protocol}`);
 	else if (currentVersion === mapPackage.version)
-		console.log(new Date(), `using existing ${protocol}@${currentVersion}`);
+		console.log(
+			new Date(),
+			`using existing ${
+				linked ? "(linked) " : ""
+			}${protocol}@${currentVersion}`,
+		);
 
 	// Load the map
 	let map;
@@ -231,3 +242,6 @@ export const loadGame = async (protocol: string): Promise<Room> => {
 		},
 	};
 };
+
+export const getGames = async (): Promise<string[]> =>
+	readFile("games.txt", "utf-8").then((file) => file.split("\n"));

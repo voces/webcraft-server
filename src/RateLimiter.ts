@@ -27,7 +27,7 @@ export default class RateLimiter {
 
 	test(power = 1): boolean {
 		const now = Date.now() / 1000;
-		const check = (1 / ((now - this.last) * 5) + 1) * power;
+		const check = (1 / ((now - this.last) * 7) + 1) * power;
 		if (this.remaining > check) {
 			this.last = now;
 			this.remaining = this.remaining - check;
