@@ -17,6 +17,23 @@ const mapsFile: Route<string | undefined, void, { map: string; file: string }> =
 				);
 				const type = mime.lookup(file);
 				response.setHeader("content-type", type || "text/plain");
+
+				// Attach the npm version of the map
+				if (file === "index.html")
+					try {
+						response.setHeader(
+							"protocol-version",
+							JSON.parse(
+								await readFile(
+									`maps/${map}/package.json`,
+									"utf-8",
+								),
+							).version,
+						);
+					} catch {
+						/* do nothing */
+					}
+
 				return contents;
 			} catch {
 				/* do nothing */
