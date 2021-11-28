@@ -3,6 +3,7 @@ import fetch from "node-fetch";
 import { maxSatisfying } from "semver";
 import tar from "tar";
 
+import { isRecord } from "./typeguards.js";
 import type { WebSocketConnection } from "./types.js";
 
 export const LATENCY = 50;
@@ -160,7 +161,7 @@ const importMap = async (
 		);
 
 	// Load the map
-	let map;
+	let map: unknown;
 	// This makes esbuild happy
 	// eslint-disable-next-line no-useless-catch
 	try {
@@ -172,6 +173,8 @@ const importMap = async (
 	}
 
 	// Validate correct format
+	if (!isRecord(map))
+		throw new Error(`Expected ${protocol} to export an object`);
 	if (typeof map.Game !== "function")
 		throw new Error(`Expected ${protocol} to export a Game class`);
 	if (typeof map.Network !== "function")
@@ -179,7 +182,7 @@ const importMap = async (
 	if (typeof map.withGame !== "function")
 		throw new Error(`Expected ${protocol} to export a withGame function`);
 
-	return map;
+	return map as Map;
 };
 
 export const loadGame = async (
@@ -263,10 +266,10 @@ export const loadGame = async (
 	};
 };
 
-export const getGames = async (): Promise<[string, string][]> =>
-	readFile("games.txt", "utf-8").then((file) =>
-		file.split("\n").map((f) => {
-			const [protocol, version] = f.split("@");
-			return [protocol, version ?? "latest"];
-		}),
-	);
+export const getGames = async (): Promise<[string, string][]> => {
+	const games = await readFile("games.txt", "utf-8").catch(() => "");
+	return games.split("\n").map((game) => {
+		const [protocol, version] = game.split("@");
+		return [protocol, version ?? "latest"];
+	});
+};

@@ -47,7 +47,6 @@ esbuild
 		],
 		watch: watching && {
 			onRebuild(error, result) {
-				console.log(result);
 				if (error) {
 					console.error(error);
 					return;
