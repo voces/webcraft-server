@@ -1,30 +1,9 @@
 {
-	"compilerOptions": {
-		"allowJs": true,
-		"target": "ES2020",
-		"lib": [ "es2019", "es2020", "DOM" ],
-		"moduleResolution": "node",
-		"strict": true,
-		"jsx": "react",
-		"jsxFactory": "h",
-		"jsxFragmentFactory": "Fragment",
-		"module": "ESNext",
-		"paths": {
-			"*": [
-				"../node_modules/*/src/index",
-				"../node_modules/*/lib/index",
-				"../node_modules/*/index",
-				"../node_modules/*/dist/index"
-			],
-			"test": ["../test"]
-		},
-		"esModuleInterop": true,
-		"types": [
-			"@types/jest",
-			"@types/node"
-		],
-		"noEmit": true
-	},
-	"include": ["src", "test", "scripts"],
-	"exclude": ["node_modules"]
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "module": "es2020",
+    "esModuleInterop": true
+  },
+  "include": ["src", "scripts"],
+  "exclude": ["node_modules"]
 }

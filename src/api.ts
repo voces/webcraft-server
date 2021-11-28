@@ -17,5 +17,3 @@ register(jsonBody);
 registerApiRoutes();
 register(missing);
 register(log);
-
-// 	authRoutes(hapi, rateLimiter);
