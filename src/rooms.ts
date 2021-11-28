@@ -3,7 +3,6 @@ import fetch from "node-fetch";
 import { maxSatisfying } from "semver";
 import tar from "tar";
 
-import { hasRecord, hasString, isRecord } from "./typeguards.js";
 import type { WebSocketConnection } from "./types.js";
 
 export const LATENCY = 50;
@@ -61,13 +60,6 @@ const extractTarball = (
 };
 
 type Package = { version: string; dist: { tarball: string }; main: string };
-
-const isPackage = (value: unknown): value is Package =>
-	isRecord(value) &&
-	hasString(value, "version") &&
-	hasRecord(value, "dist") &&
-	hasString(value.dist, "tarball") &&
-	hasString(value, "main");
 
 type NpmRegistryEntry = {
 	"dist-tags": Record<string, string>;
