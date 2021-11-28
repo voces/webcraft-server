@@ -1,0 +1,9 @@
+{
+  "editor.defaultFormatter": "rvest.vs-code-prettier-eslint",
+  "[typescript]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  }
+}

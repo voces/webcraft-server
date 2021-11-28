@@ -1,2 +1,2 @@
-katma
-mazingcontest
+katma@1
+mazingcontest@1

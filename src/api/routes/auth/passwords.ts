@@ -2,6 +2,16 @@ import { URL } from "url";
 import { Worker } from "worker_threads";
 
 const worker = new Worker(new URL("passwordsWorker.js", import.meta.url));
+worker.addListener("error", (err) => {
+	if (err.message.match(/Cannot find module/)) {
+		console.error(
+			"passwordsWorker.js not found; try building it with `npm run build-passwords-worker`",
+		);
+		process.exit(1);
+	}
+	console.error(err);
+	process.exit(1);
+});
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const jobs: ((data: any) => void)[] = [];

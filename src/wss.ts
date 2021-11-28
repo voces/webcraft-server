@@ -90,8 +90,8 @@ export default (server: Server): void => {
 	);
 
 	getGames().then((games) =>
-		games.forEach((game) =>
-			loadGame(game)
+		games.forEach(([game, version]) =>
+			loadGame(game, version)
 				.then((room) => (rooms[game] = room))
 				.catch(console.error),
 		),

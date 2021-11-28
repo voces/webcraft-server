@@ -1,5 +1,6 @@
 import { lstat, mkdir, readFile } from "fs/promises";
 import fetch from "node-fetch";
+import { maxSatisfying } from "semver";
 import tar from "tar";
 
 import { hasRecord, hasString, isRecord } from "./typeguards.js";
@@ -68,20 +69,39 @@ const isPackage = (value: unknown): value is Package =>
 	hasString(value.dist, "tarball") &&
 	hasString(value, "main");
 
+type NpmRegistryEntry = {
+	"dist-tags": Record<string, string>;
+	versions: Record<string, Package>;
+};
+
+const getLatestVersion = async (protocol: string, range: string) => {
+	const registry = await fetch(`https://registry.npmjs.org/${protocol}`).then(
+		(r) => r.json() as Promise<NpmRegistryEntry>,
+	);
+
+	// A tagged version, like @latest or @alpha
+	if (registry["dist-tags"][range])
+		return registry.versions[registry["dist-tags"][range]];
+
+	// An explicit version, like @2.3.5
+	if (registry.versions[range]) return registry.versions[range];
+
+	const version = maxSatisfying(Object.keys(registry.versions), range);
+
+	if (version && registry.versions[version])
+		return registry.versions[version];
+
+	throw new Error(`Could not find valid version for ${protocol}@${range}`);
+};
+
 const fetchLatest = async (
 	protocol: string,
+	targetVersion: string,
 	currentVersion: string | undefined,
 ): Promise<Package | undefined> => {
 	// Fetch latest version/tarball url
-	console.log(new Date(), `fetching ${protocol} url`);
-	const data = await fetch(
-		`http://registry.npmjs.org/${protocol}/latest`,
-	).then((r) => r.json());
-
-	if (!isPackage(data)) {
-		console.error(new Error(`Invalid package.json for ${protocol}@latest`));
-		return;
-	}
+	console.log(new Date(), `fetching latest ${protocol}@${targetVersion}`);
+	const data = await getLatestVersion(protocol, targetVersion);
 
 	if (data.version === currentVersion) return;
 
@@ -112,7 +132,10 @@ const fetchLatest = async (
 	}
 };
 
-const importMap = async (protocol: string): Promise<Map> => {
+const importMap = async (
+	protocol: string,
+	targetVersion: string,
+): Promise<Map> => {
 	// Fetch current version, if it exists
 	let currentVersion: string | undefined;
 	let mapPackage: Package | undefined;
@@ -131,8 +154,10 @@ const importMap = async (protocol: string): Promise<Map> => {
 
 	// Fetch latest version/tarball url
 	mapPackage = linked
-		? (await fetchLatest(protocol, currentVersion)) ?? mapPackage
-		: mapPackage;
+		? mapPackage
+		: (await fetchLatest(protocol, targetVersion, currentVersion)) ??
+		  mapPackage;
+
 	if (!mapPackage) throw new Error(`Could not import ${protocol}`);
 	else if (currentVersion === mapPackage.version)
 		console.log(
@@ -165,8 +190,11 @@ const importMap = async (protocol: string): Promise<Map> => {
 	return map;
 };
 
-export const loadGame = async (protocol: string): Promise<Room> => {
-	const { Game, Network, withGame } = await importMap(protocol);
+export const loadGame = async (
+	protocol: string,
+	version: string,
+): Promise<Room> => {
+	const { Game, Network, withGame } = await importMap(protocol, version);
 	const game = new Game(new Network());
 
 	game.synchronizationState = "synchronized";
@@ -243,5 +271,10 @@ export const loadGame = async (protocol: string): Promise<Room> => {
 	};
 };
 
-export const getGames = async (): Promise<string[]> =>
-	readFile("games.txt", "utf-8").then((file) => file.split("\n"));
+export const getGames = async (): Promise<[string, string][]> =>
+	readFile("games.txt", "utf-8").then((file) =>
+		file.split("\n").map((f) => {
+			const [protocol, version] = f.split("@");
+			return [protocol, version ?? "latest"];
+		}),
+	);
