@@ -2,6 +2,7 @@ import { lstat, mkdir, readFile } from "fs/promises";
 import fetch from "node-fetch";
 import { maxSatisfying } from "semver";
 import tar from "tar";
+import { NodeVM } from "vm2";
 
 import { isRecord } from "./typeguards.js";
 import type { WebSocketConnection } from "./types.js";
@@ -160,17 +161,27 @@ const importMap = async (
 			}${protocol}@${currentVersion}`,
 		);
 
-	// Load the map
-	let map: unknown;
-	// This makes esbuild happy
-	// eslint-disable-next-line no-useless-catch
-	try {
-		map = await import(`../maps/${protocol}/${mapPackage.main}`).then(
-			(i) => i.default,
-		);
-	} catch (err) {
-		throw err;
-	}
+	const worker = new NodeVM({
+		console: "redirect",
+		require: { external: [`../maps/${protocol}/${mapPackage.main}`] },
+	});
+
+	const tag = `[${protocol}]`;
+	worker.addListener("console.log", (...args) =>
+		console.log(new Date(), tag, ...args),
+	);
+	worker.addListener("console.info", (...args) =>
+		console.info(new Date(), tag, ...args),
+	);
+	worker.addListener("console.warn", (...args) =>
+		console.warn(new Date(), tag, ...args),
+	);
+	worker.addListener("console.error", (...args) =>
+		console.error(new Date(), tag, ...args),
+	);
+	worker.addListener("console.dir", (...args) => console.dir(...args));
+
+	const map: unknown = worker.runFile(`maps/${protocol}/${mapPackage.main}`);
 
 	// Validate correct format
 	if (!isRecord(map))

@@ -2,7 +2,6 @@
 
 This is the server for [WebCraft](https://github.com/voces/webcraft). It
 creates singleton instances WebCraft games which authenicated users can join.
-Note WebCraft games are not sandboxed and should be run with caution.
 
 ## Usage
 

@@ -33,7 +33,10 @@ wss.on("connection", async (ws: WebSocketConnection, req) => {
 
 	const room = rooms[roomId];
 	if (!room) {
-		console.log(new Date(), "Dropping client with invalid room");
+		console.log(
+			new Date(),
+			`Dropping client with invalid room '${roomId}'`,
+		);
 		return ws.close();
 	}
 

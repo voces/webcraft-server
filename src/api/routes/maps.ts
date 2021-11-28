@@ -69,7 +69,7 @@ const mapsList: Route<string | undefined | unknown, void> = {
 	handler: async ({ response }) => {
 		response.setHeader("Content-Type", "text/html");
 		return getGames().then((games) =>
-			games.map((g) => `<a href="/maps/${g}">${g}</a>`).join("<br>"),
+			games.map(([g]) => `<a href="/maps/${g}">${g}</a>`).join("<br>"),
 		);
 	},
 };

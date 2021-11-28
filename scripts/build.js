@@ -44,6 +44,7 @@ esbuild
 			"node-fetch",
 			"tar",
 			"ws",
+			"vm2",
 		],
 		watch: watching && {
 			onRebuild(error, result) {
