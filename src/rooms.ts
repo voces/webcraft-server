@@ -70,8 +70,10 @@ type NpmRegistryEntry = {
 
 const getLatestVersion = async (protocol: string, range: string) => {
 	const registry = await fetch(`https://registry.npmjs.org/${protocol}`).then(
-		(r) => r.json() as Promise<NpmRegistryEntry>,
+		(r) => r.json() as Promise<NpmRegistryEntry | { error: string }>,
 	);
+
+	if ("error" in registry) throw new Error(registry.error);
 
 	// A tagged version, like @latest or @alpha
 	if (registry["dist-tags"][range])
@@ -94,14 +96,26 @@ const fetchLatest = async (
 	currentVersion: string | undefined,
 ): Promise<Package | undefined> => {
 	// Fetch latest version/tarball url
-	console.log(new Date(), `fetching latest ${protocol}@${targetVersion}`);
-	const data = await getLatestVersion(protocol, targetVersion);
+	console.log(
+		new Date(),
+		`[${protocol}]`,
+		`fetching latest ${protocol}@${targetVersion}`,
+	);
+	const data = await getLatestVersion(protocol, targetVersion).catch(
+		() => new Error("Could not get latest version"),
+	);
+
+	if (data instanceof Error) {
+		console.error(new Date(), `[${protocol}]`, data.message);
+		return;
+	}
 
 	if (data.version === currentVersion) return;
 
 	// Fetch the latest version if it is different than the current one
 	console.log(
 		new Date(),
+		`[${protocol}]`,
 		`fetching ${protocol}@${data.version} tarball at ${data.dist.tarball}`,
 	);
 
@@ -130,6 +144,8 @@ const importMap = async (
 	protocol: string,
 	targetVersion: string,
 ): Promise<Map> => {
+	const tag = `[${protocol}]`;
+
 	// Fetch current version, if it exists
 	let currentVersion: string | undefined;
 	let mapPackage: Package | undefined;
@@ -156,6 +172,7 @@ const importMap = async (
 	else if (currentVersion === mapPackage.version)
 		console.log(
 			new Date(),
+			tag,
 			`using existing ${
 				linked ? "(linked) " : ""
 			}${protocol}@${currentVersion}`,
@@ -166,7 +183,6 @@ const importMap = async (
 		require: { external: [`../maps/${protocol}/${mapPackage.main}`] },
 	});
 
-	const tag = `[${protocol}]`;
 	worker.addListener("console.log", (...args) =>
 		console.log(new Date(), tag, ...args),
 	);
